@@ -324,7 +324,7 @@ export default function AdminIuranPage() {
                             item.iuran_4 > 0 ? { label: '4', amount: item.iuran_4 } : null,
                             item.iuran_5 > 0 ? { label: '5', amount: item.iuran_5 } : null,
                           ].filter(Boolean).length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
+                            <div className="flex flex-col gap-1">
                               {[
                                 item.iuran_1 > 0 ? { label: '1', amount: item.iuran_1 } : null,
                                 item.iuran_2 > 0 ? { label: '2', amount: item.iuran_2 } : null,
@@ -332,7 +332,7 @@ export default function AdminIuranPage() {
                                 item.iuran_4 > 0 ? { label: '4', amount: item.iuran_4 } : null,
                                 item.iuran_5 > 0 ? { label: '5', amount: item.iuran_5 } : null,
                               ].filter(Boolean).map((iuran, index) => (
-                                <div key={index} className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-green-100/80 dark:bg-green-900/30 border border-green-200/50 dark:border-green-700/50">
+                                <div key={index} className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-green-100/80 dark:bg-green-900/30 border border-green-200/50 dark:border-green-700/50 whitespace-nowrap">
                                   <span className="text-green-800 dark:text-green-200 font-semibold mr-1">Iuran {iuran.label}:</span>
                                   <span className="text-green-700 dark:text-green-300">{formatCurrency(iuran.amount)}</span>
                                 </div>
