@@ -70,8 +70,15 @@ export default function ExportPage() {
     
     try {
       const filteredData = getFilteredData();
-      const timestamp = new Date().toISOString().slice(0, 10);
-      const filename = `iuran-export-${timestamp}`;
+      // Format: YYYY-MM-DDTHH-mm-ss (ISO-8601 dengan waktu lokal)
+      const now = new Date();
+      const timestamp = now.getFullYear() + '-' + 
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0') + 'T' +
+        String(now.getHours()).padStart(2, '0') + '-' +
+        String(now.getMinutes()).padStart(2, '0') + '-' +
+        String(now.getSeconds()).padStart(2, '0');
+      const filename = `iuran_export_${timestamp}`;
       
       switch (format) {
         case 'xlsx':

@@ -8,10 +8,9 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { Card, CardContent } from '@/components/ui/Card';
-import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { useUpdateUser } from '@/hooks/useUsers';
 import { useAuth } from '@/hooks/useAuth';
-import { UserPen, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { UserPen, Eye, EyeOff, AlertCircle, CheckCircle, Shield } from 'lucide-react';
 import { User } from '@/types';
 
 const editUserSchema = z.object({
@@ -78,9 +77,15 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
   const onSubmit = (data: EditUserFormData) => {
     if (!user) return;
     
-    // Show confirmation dialog
-    setPendingData(data);
-    setShowConfirmation(true);
+    if (!showConfirmation) {
+      // First click - show inline confirmation
+      setPendingData(data);
+      setShowConfirmation(true);
+      return;
+    }
+    
+    // Second click - actually submit
+    handleConfirmUpdate();
   };
 
   const handleConfirmUpdate = async () => {
@@ -88,7 +93,6 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
     
     setErrorMessage('');
     setSuccessMessage('');
-    setShowConfirmation(false);
     
     const updateData: any = {
       id: user.id,
@@ -114,6 +118,8 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
         }
         
         setSuccessMessage(`User "${user.username}" berhasil diupdate!`);
+        setShowConfirmation(false);
+        setPendingData(null);
         
         // Auto close after 2 seconds
         setTimeout(() => {
@@ -200,8 +206,8 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
             className="glass-input font-normal text-base w-full bg-gray-100/70 dark:bg-gray-800/70 cursor-not-allowed"
             title="Username tidak dapat diubah karena merupakan identifier unik"
           />
-          <p className="text-xs text-gray-500 dark:text-gray-400 flex items-start space-x-1">
-            <span className="text-amber-500 mt-0.5">ⓘ</span>
+          <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start space-x-1">
+            <span className="text-amber-600 dark:text-amber-400 mt-0.5">ⓘ</span>
             <span>Username tidak dapat diubah karena bersifat unik dan digunakan sebagai identifier sistem</span>
           </p>
         </div>
@@ -211,7 +217,7 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
           {...register('full_name')}
           error={errors.full_name?.message}
           placeholder="Masukkan nama lengkap"
-          disabled={updateUserMutation.isPending}
+          disabled={updateUserMutation.isPending || showConfirmation}
         />
 
         <div className="space-y-2">
@@ -227,8 +233,8 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
                 className="glass-input font-normal text-base w-full bg-gray-100/70 dark:bg-gray-800/70 cursor-not-allowed"
                 title="Role SUPERADMIN tidak dapat diubah"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 flex items-start space-x-1">
-                <span className="text-amber-500 mt-0.5">ⓘ</span>
+              <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start space-x-1">
+                <span className="text-amber-600 dark:text-amber-400 mt-0.5">ⓘ</span>
                 <span>Role SUPERADMIN tidak dapat diubah untuk menjaga keamanan sistem</span>
               </p>
             </>
@@ -238,7 +244,7 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
                 <select
                   {...register('role')}
                   className="glass-select font-normal text-base w-full pr-10"
-                  disabled={updateUserMutation.isPending}
+                  disabled={updateUserMutation.isPending || showConfirmation}
                   defaultValue={user.role}
                 >
                   <option value="admin">Admin</option>
@@ -275,14 +281,14 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
                 type={showPassword ? 'text' : 'password'}
                 className="glass-input font-normal text-base w-full pr-10"
                 placeholder="Kosongkan jika tidak ingin mengubah"
-                disabled={updateUserMutation.isPending}
+                disabled={updateUserMutation.isPending || showConfirmation}
                 {...register('password')}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                disabled={updateUserMutation.isPending}
+                disabled={updateUserMutation.isPending || showConfirmation}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -301,14 +307,14 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
                 type={showConfirmPassword ? 'text' : 'password'}
                 className="glass-input font-normal text-base w-full pr-10"
                 placeholder="Konfirmasi password baru"
-                disabled={updateUserMutation.isPending}
+                disabled={updateUserMutation.isPending || showConfirmation}
                 {...register('confirmPassword')}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                disabled={updateUserMutation.isPending}
+                disabled={updateUserMutation.isPending || showConfirmation}
               >
                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -319,11 +325,30 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
           </div>
         </div>
 
+        {/* Inline Confirmation Warning */}
+        {showConfirmation && (
+          <Card className="bg-amber-50/80 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 mb-4">
+            <CardContent className="p-4">
+              <div className="flex items-start space-x-3">
+                <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm text-amber-700 dark:text-amber-300 font-medium mb-2">
+                    Konfirmasi Update User
+                  </p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    Anda akan mengupdate data user <strong>"{user.username}"</strong>. Klik "Konfirmasi" untuk melanjutkan atau "Batal" untuk membatalkan.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="flex space-x-4 pt-4">
           <Button
             type="button"
             variant="outline"
-            onClick={handleClose}
+            onClick={showConfirmation ? handleCancelConfirmation : handleClose}
             className="flex-1"
             disabled={updateUserMutation.isPending}
           >
@@ -334,24 +359,22 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
             className="flex-1"
             isLoading={updateUserMutation.isPending}
             disabled={updateUserMutation.isPending}
+            variant={showConfirmation ? "warning" : "default"}
           >
-            <UserPen className="mr-2 h-4 w-4" />
-            Update User
+            {showConfirmation ? (
+              <>
+                <Shield className="mr-2 h-4 w-4" />
+                Konfirmasi
+              </>
+            ) : (
+              <>
+                <UserPen className="mr-2 h-4 w-4" />
+                Update User
+              </>
+            )}
           </Button>
         </div>
       </form>
-
-      <ConfirmationModal
-        isOpen={showConfirmation}
-        onClose={handleCancelConfirmation}
-        onConfirm={handleConfirmUpdate}
-        title="Konfirmasi Update User"
-        message={`Apakah Anda yakin ingin mengupdate data user "${user.username}"?`}
-        confirmText="Update User"
-        cancelText="Batal"
-        isLoading={updateUserMutation.isPending}
-        variant="primary"
-      />
     </Modal>
   );
 }

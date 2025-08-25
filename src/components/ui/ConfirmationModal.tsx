@@ -1,5 +1,6 @@
 'use client';
 
+import { ReactNode } from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import { AlertTriangle } from 'lucide-react';
@@ -9,7 +10,7 @@ interface ConfirmationModalProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message: string | ReactNode;
   confirmText?: string;
   cancelText?: string;
   isLoading?: boolean;
@@ -60,9 +61,9 @@ export function ConfirmationModal({
             <AlertTriangle className={`w-5 h-5 ${styles.iconColor}`} />
           </div>
           <div className="flex-1">
-            <p className="text-gray-700 dark:text-white">
+            <div className="text-gray-700 dark:text-white">
               {message}
-            </p>
+            </div>
           </div>
         </div>
 

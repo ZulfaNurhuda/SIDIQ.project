@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useRequireRole, useAuth } from '@/hooks/useAuth';
-import { useIuranData } from '@/hooks/useIuranData';
+import { useIuranData, useDeleteIuran } from '@/hooks/useIuranData';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { EditIuranForm } from '@/components/forms/EditIuranForm';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { 
   Search, 
   Filter, 
@@ -29,6 +30,16 @@ export default function AdminIuranPage() {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'name'>('date');
   const [editingIuran, setEditingIuran] = useState<any>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    iuranId: string;
+    jamaahName: string;
+    bulanTahun: string;
+  }>({ isOpen: false, iuranId: '', jamaahName: '', bulanTahun: '' });
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const deleteIuranMutation = useDeleteIuran();
 
   if (roleLoading || !hasAccess) {
     return (
@@ -45,6 +56,31 @@ export default function AdminIuranPage() {
       </div>
     );
   }
+
+  const handleDeleteIuran = (iuranId: string, jamaahName: string, bulanTahun: string) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      iuranId,
+      jamaahName,
+      bulanTahun
+    });
+    setErrorMessage('');
+  };
+
+  const confirmDeleteIuran = async () => {
+    try {
+      await deleteIuranMutation.mutateAsync(deleteConfirmation.iuranId);
+      setSuccessMessage(`Data iuran ${deleteConfirmation.jamaahName} berhasil dihapus!`);
+      setDeleteConfirmation({ isOpen: false, iuranId: '', jamaahName: '', bulanTahun: '' });
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error: any) {
+      console.error('Error deleting iuran:', error);
+      setErrorMessage(error.message || 'Gagal menghapus data iuran');
+      setDeleteConfirmation({ isOpen: false, iuranId: '', jamaahName: '', bulanTahun: '' });
+    }
+  };
 
   // Filter and sort data
   const filteredData = iuranData?.filter((item) => {
@@ -134,6 +170,41 @@ export default function AdminIuranPage() {
         </Card>
       </div>
 
+      {/* Success/Error Messages */}
+      {successMessage && (
+        <Card className="bg-green-50/80 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-600 dark:text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <p className="text-sm text-green-700 dark:text-green-300 font-medium">
+                {successMessage}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {errorMessage && (
+        <Card className="bg-red-50/80 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-600 dark:text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <p className="text-sm text-red-700 dark:text-red-300 font-medium">
+                {errorMessage}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
@@ -162,7 +233,7 @@ export default function AdminIuranPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'date' | 'amount' | 'name')}
-              className="glass-input font-normal text-base w-full md:w-48"
+              className="glass-select font-normal text-base w-full md:w-48"
             >
               <option value="date">Terbaru</option>
               <option value="amount">Terbesar</option>
@@ -262,7 +333,7 @@ export default function AdminIuranPage() {
                                 item.iuran_5 > 0 ? { label: '5', amount: item.iuran_5 } : null,
                               ].filter(Boolean).map((iuran, index) => (
                                 <div key={index} className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-green-100/80 dark:bg-green-900/30 border border-green-200/50 dark:border-green-700/50">
-                                  <span className="text-green-800 dark:text-green-200 font-semibold mr-1">#{iuran.label}:</span>
+                                  <span className="text-green-800 dark:text-green-200 font-semibold mr-1">Iuran {iuran.label}:</span>
                                   <span className="text-green-700 dark:text-green-300">{formatCurrency(iuran.amount)}</span>
                                 </div>
                               ))}
@@ -291,6 +362,15 @@ export default function AdminIuranPage() {
                             variant="destructive"
                             size="sm"
                             title="Hapus data"
+                            onClick={() => handleDeleteIuran(
+                              item.id, 
+                              item.nama_jamaah, 
+                              new Date(item.bulan_tahun).toLocaleDateString('id-ID', {
+                                month: 'long',
+                                year: 'numeric'
+                              })
+                            )}
+                            disabled={deleteIuranMutation.isPending}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -311,6 +391,18 @@ export default function AdminIuranPage() {
         iuranData={editingIuran}
         currentUserId={user?.id}
         currentUserRole={user?.role}
+      />
+      
+      <ConfirmationModal
+        isOpen={deleteConfirmation.isOpen}
+        onClose={() => setDeleteConfirmation({ isOpen: false, iuranId: '', jamaahName: '', bulanTahun: '' })}
+        onConfirm={confirmDeleteIuran}
+        title="Hapus Data Iuran"
+        message={`Apakah Anda yakin ingin menghapus data iuran "${deleteConfirmation.jamaahName}" untuk bulan ${deleteConfirmation.bulanTahun}? Tindakan ini tidak dapat dibatalkan.`}
+        confirmText="Hapus Data"
+        cancelText="Batal"
+        isLoading={deleteIuranMutation.isPending}
+        variant="danger"
       />
     </div>
   );

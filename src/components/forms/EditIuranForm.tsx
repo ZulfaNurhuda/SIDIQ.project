@@ -8,8 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { Card, CardContent } from '@/components/ui/Card';
-import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
-import { Edit, AlertCircle, CheckCircle, Calculator } from 'lucide-react';
+import { Edit, AlertCircle, CheckCircle, Calculator, Shield } from 'lucide-react';
 import { formatCurrency, formatNumber, parseCurrency } from '@/lib/utils';
 import { useUpdateIuran } from '@/hooks/useIuranData';
 
@@ -101,9 +100,15 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
   const onSubmit = (data: EditIuranFormData) => {
     if (!iuranData) return;
     
-    // Show confirmation dialog
-    setPendingData(data);
-    setShowConfirmation(true);
+    if (!showConfirmation) {
+      // First click - show inline confirmation
+      setPendingData(data);
+      setShowConfirmation(true);
+      return;
+    }
+    
+    // Second click - actually submit
+    handleConfirmUpdate();
   };
 
   const handleConfirmUpdate = async () => {
@@ -111,7 +116,6 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
     
     setErrorMessage('');
     setSuccessMessage('');
-    setShowConfirmation(false);
     
     updateIuranMutation.mutate({
       id: iuranData.id,
@@ -119,6 +123,8 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
     }, {
       onSuccess: () => {
         setSuccessMessage(`Iuran "${iuranData.nama_jamaah}" berhasil diupdate!`);
+        setShowConfirmation(false);
+        setPendingData(null);
         
         // Auto close after 2 seconds
         setTimeout(() => {
@@ -275,10 +281,10 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
                   <input
                     type="text"
                     className={`glass-input font-normal text-base w-full pl-12 ${
-                      !canEdit ? 'bg-gray-100/70 dark:bg-gray-800/70 cursor-not-allowed' : ''
+                      (!canEdit || showConfirmation) ? 'bg-gray-100/70 dark:bg-gray-800/70 cursor-not-allowed' : ''
                     }`}
                     placeholder="0"
-                    disabled={!canEdit}
+                    disabled={!canEdit || showConfirmation}
                     onChange={handleCurrencyInput(fieldName)}
                     value={inputValues[fieldName] || ''}
                   />
@@ -316,11 +322,30 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
           </CardContent>
         </Card>
 
+        {/* Inline Confirmation Warning */}
+        {showConfirmation && (
+          <Card className="bg-amber-50/80 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 mb-4">
+            <CardContent className="p-4">
+              <div className="flex items-start space-x-3">
+                <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm text-amber-700 dark:text-amber-300 font-medium mb-2">
+                    Konfirmasi Update Iuran
+                  </p>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    Anda akan mengupdate data iuran <strong>"{iuranData.nama_jamaah}"</strong> untuk bulan <strong>{new Date(iuranData.bulan_tahun).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</strong>. Klik "Konfirmasi" untuk melanjutkan atau "Batal" untuk membatalkan.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="flex space-x-4 pt-4">
           <Button
             type="button"
             variant="outline"
-            onClick={handleClose}
+            onClick={showConfirmation ? handleCancelConfirmation : handleClose}
             className="flex-1"
           >
             Batal
@@ -331,25 +356,23 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
               className="flex-1"
               isLoading={updateIuranMutation.isPending}
               disabled={updateIuranMutation.isPending}
+              variant={showConfirmation ? "warning" : "default"}
             >
-              <Edit className="mr-2 h-4 w-4" />
-              Update Iuran
+              {showConfirmation ? (
+                <>
+                  <Shield className="mr-2 h-4 w-4" />
+                  Konfirmasi
+                </>
+              ) : (
+                <>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Update Iuran
+                </>
+              )}
             </Button>
           )}
         </div>
       </form>
-
-      <ConfirmationModal
-        isOpen={showConfirmation}
-        onClose={handleCancelConfirmation}
-        onConfirm={handleConfirmUpdate}
-        title="Konfirmasi Update Iuran"
-        message={`Apakah Anda yakin ingin mengupdate data iuran "${iuranData.nama_jamaah}" untuk bulan ${new Date(iuranData.bulan_tahun).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}?`}
-        confirmText="Update Iuran"
-        cancelText="Batal"
-        isLoading={updateIuranMutation.isPending}
-        variant="primary"
-      />
     </Modal>
   );
 }

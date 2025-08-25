@@ -477,9 +477,9 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Insert default SUPERADMIN user
 INSERT INTO public.users (username, full_name, password_hash, role)
 VALUES (
-  'ZulfaNurhuda',
-  'Zulfa Nurhuda',
-  hash_password('Zn.9192631770'),
+  'admin',
+  'Bung Admin',
+  hash_password('AdMin12345#'),
   'superadmin'
 );
 

@@ -204,3 +204,45 @@ export function useUpdateIuran() {
     },
   });
 }
+
+export function useDeleteIuran() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (iuranId: string) => {
+      console.log('Deleting iuran:', iuranId);
+      
+      // Validate iuranId
+      if (!iuranId) {
+        throw new Error('ID iuran tidak valid');
+      }
+      
+      try {
+        // Use RPC function for delete if available, otherwise direct delete
+        const { data, error } = await supabase.rpc('delete_iuran_submission', { 
+          p_submission_id: iuranId 
+        });
+
+        if (error) {
+          console.error('Supabase RPC error (delete_iuran_submission):', error);
+          throw new Error(`Database error: ${error.message || 'Unknown error'}`);
+        }
+
+        if (!data) {
+          throw new Error('Gagal menghapus data iuran - data mungkin tidak ada');
+        }
+
+        return data;
+      } catch (err) {
+        if (err instanceof Error) {
+          throw err;
+        }
+        throw new Error('Terjadi kesalahan yang tidak diketahui saat menghapus iuran');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['iuran'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    },
+  });
+}
