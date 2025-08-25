@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUpdateUser } from '@/hooks/useUsers';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -48,13 +49,16 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, login, setUser } = useAuth();
+  const updateUserMutation = useUpdateUser();
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'appearance' | 'system'>('profile');
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   const passwordForm = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
@@ -69,28 +73,95 @@ export default function SettingsPage() {
   const onPasswordSubmit = async (data: PasswordFormData) => {
     setErrorMessage('');
     setSuccessMessage('');
+    setIsUpdatingPassword(true);
+    
+    if (!user) return;
     
     try {
-      // TODO: Implement password change logic
-      console.log('Change password:', data);
-      setSuccessMessage('Password berhasil diubah!');
-      passwordForm.reset();
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Gagal mengubah password');
+      // First verify current password by attempting to authenticate
+      const authResult = await login(user.username, data.currentPassword);
+      
+      if (!authResult.success) {
+        setErrorMessage('Password saat ini salah. Silakan periksa kembali.');
+        setIsUpdatingPassword(false);
+        return;
+      }
+      
+      // If current password is correct, update to new password
+      // COPY EXACT METHOD FROM EditUserForm!
+      const updateData: any = {
+        id: user.id,
+        full_name: user.full_name, // Keep current full_name
+        role: user.role, // Keep current role
+      };
+
+      // Only include password if it's provided
+      if (data.newPassword && data.newPassword.length > 0) {
+        updateData.password = data.newPassword;
+      }
+
+      updateUserMutation.mutate(updateData, {
+        onSuccess: () => {
+          setSuccessMessage('Password berhasil diubah!');
+          passwordForm.reset();
+          setIsUpdatingPassword(false);
+        },
+        onError: (error: any) => {
+          console.error('Error changing password:', error);
+          
+          let displayError = 'Gagal mengubah password';
+          if (error?.message) {
+            displayError = error.message;
+          } else if (error?.error?.message) {
+            displayError = error.error.message;
+          }
+          
+          setErrorMessage(displayError);
+          setIsUpdatingPassword(false);
+        }
+      });
+    } catch (error) {
+      console.error('Unexpected error in password change:', error);
+      setErrorMessage('Terjadi kesalahan yang tidak terduga');
+      setIsUpdatingPassword(false);
     }
   };
 
   const onProfileSubmit = async (data: ProfileFormData) => {
     setErrorMessage('');
     setSuccessMessage('');
+    setIsUpdatingProfile(true);
     
-    try {
-      // TODO: Implement profile update logic
-      console.log('Update profile:', data);
-      setSuccessMessage('Profile berhasil diupdate!');
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Gagal mengupdate profile');
-    }
+    if (!user) return;
+    
+    updateUserMutation.mutate({
+      id: user.id,
+      full_name: data.fullName,
+    }, {
+      onSuccess: () => {
+        // Update current user state
+        setUser({
+          ...user,
+          full_name: data.fullName,
+        });
+        
+        setSuccessMessage('Profile berhasil diupdate!');
+        setIsUpdatingProfile(false);
+      },
+      onError: (error: any) => {
+        console.error('Error updating profile:', error);
+        
+        let displayError = 'Gagal mengupdate profile';
+        if (error?.message) {
+          displayError = error.message;
+        } else if (error?.error?.message) {
+          displayError = error.error.message;
+        }
+        
+        setErrorMessage(displayError);
+        setIsUpdatingProfile(false);
+      }
+    });
   };
 
   const getRoleBadgeVariant = (role: string) => {
@@ -110,8 +181,15 @@ export default function SettingsPage() {
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'security', label: 'Keamanan', icon: Shield },
     { id: 'appearance', label: 'Tampilan', icon: Palette },
-    { id: 'system', label: 'Sistem', icon: Database },
+    ...(user?.role === 'superadmin' ? [{ id: 'system', label: 'Sistem', icon: Database }] : []),
   ];
+
+  // Reset activeTab if user is not superadmin and currently on system tab
+  useEffect(() => {
+    if (user?.role !== 'superadmin' && activeTab === 'system') {
+      setActiveTab('profile');
+    }
+  }, [user?.role, activeTab]);
 
   return (
     <div className="space-y-6">
@@ -151,40 +229,33 @@ export default function SettingsPage() {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Settings className="h-5 w-5" />
-              <span>Kategori</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <nav className="space-y-1">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-colors ${
-                      activeTab === tab.id
-                        ? 'bg-primary-100 dark:bg-primary-900/20 text-primary-900 dark:text-primary-100 border-r-2 border-primary-500'
-                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </CardContent>
-        </Card>
+      {/* Tab Navigation */}
+      <Card>
+        <CardContent className="p-4">
+          <nav className="flex flex-wrap gap-2">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? 'bg-primary-500/20 text-primary-900 dark:text-primary-100 border border-primary-300/50'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-500/10 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </CardContent>
+      </Card>
 
-        {/* Content */}
-        <div className="lg:col-span-3">
+      {/* Content */}
+      <div>
           {/* Profile Tab */}
           {activeTab === 'profile' && (
             <Card>
@@ -228,7 +299,11 @@ export default function SettingsPage() {
                   />
                   
                   <div className="flex justify-end">
-                    <Button type="submit">
+                    <Button 
+                      type="submit" 
+                      isLoading={isUpdatingProfile}
+                      disabled={isUpdatingProfile}
+                    >
                       <Save className="mr-2 h-4 w-4" />
                       Simpan Perubahan
                     </Button>
@@ -246,59 +321,69 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
-                  <div className="relative">
-                    <Input
-                      label="Password Saat Ini"
-                      type={showCurrentPassword ? 'text' : 'password'}
-                      {...passwordForm.register('currentPassword')}
-                      error={passwordForm.formState.errors.currentPassword?.message}
-                      placeholder="Masukkan password saat ini"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      className="absolute right-3 top-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                    >
-                      {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                  <div className="space-y-2">
+                    <label className="text-caption text-gray-700 dark:text-gray-300">
+                      Password Saat Ini
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="password"
+                        className="glass-input font-normal text-base w-full bg-gray-100/70 dark:bg-gray-800/70 cursor-not-allowed"
+                        placeholder="Masukkan password saat ini"
+                        disabled={true}
+                        readOnly
+                      />
+                    </div>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start space-x-1">
+                      <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span>Fitur ubah password mandiri saat ini dinonaktifkan</span>
+                    </p>
                   </div>
 
-                  <div className="relative">
-                    <Input
-                      label="Password Baru"
-                      type={showNewPassword ? 'text' : 'password'}
-                      {...passwordForm.register('newPassword')}
-                      error={passwordForm.formState.errors.newPassword?.message}
-                      placeholder="Masukkan password baru"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3 top-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                    >
-                      {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                  <div className="space-y-2">
+                    <label className="text-caption text-gray-700 dark:text-gray-300">
+                      Password Baru
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="password"
+                        className="glass-input font-normal text-base w-full bg-gray-100/70 dark:bg-gray-800/70 cursor-not-allowed"
+                        placeholder="Masukkan password baru"
+                        disabled={true}
+                        readOnly
+                      />
+                    </div>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start space-x-1">
+                      <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span>Fitur ubah password mandiri saat ini dinonaktifkan</span>
+                    </p>
                   </div>
 
-                  <div className="relative">
-                    <Input
-                      label="Konfirmasi Password Baru"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      {...passwordForm.register('confirmPassword')}
-                      error={passwordForm.formState.errors.confirmPassword?.message}
-                      placeholder="Konfirmasi password baru"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                  <div className="space-y-2">
+                    <label className="text-caption text-gray-700 dark:text-gray-300">
+                      Konfirmasi Password Baru
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="password"
+                        className="glass-input font-normal text-base w-full bg-gray-100/70 dark:bg-gray-800/70 cursor-not-allowed"
+                        placeholder="Konfirmasi password baru"
+                        disabled={true}
+                        readOnly
+                      />
+                    </div>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 flex items-start space-x-1">
+                      <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                      <span>Fitur ubah password mandiri saat ini dinonaktifkan</span>
+                    </p>
                   </div>
 
                   <div className="flex justify-end pt-4">
-                    <Button type="submit">
+                    <Button 
+                      type="submit"
+                      isLoading={isUpdatingPassword}
+                      disabled={isUpdatingPassword}
+                    >
                       <Shield className="mr-2 h-4 w-4" />
                       Ubah Password
                     </Button>
@@ -431,7 +516,6 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           )}
-        </div>
       </div>
     </div>
   );

@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useRequireRole } from '@/hooks/useAuth';
+import { useRequireRole, useAuth } from '@/hooks/useAuth';
 import { useIuranData } from '@/hooks/useIuranData';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { EditIuranForm } from '@/components/forms/EditIuranForm';
 import { 
   Search, 
   Filter, 
@@ -15,17 +16,19 @@ import {
   Users,
   DollarSign,
   Download,
-  Eye,
+  Edit,
   Trash2
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
 export default function AdminIuranPage() {
   const { hasAccess, isLoading: roleLoading } = useRequireRole(['superadmin', 'admin']);
+  const { user } = useAuth();
   const { data: iuranData, isLoading: dataLoading } = useIuranData();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'name'>('date');
+  const [editingIuran, setEditingIuran] = useState<any>(null);
 
   if (roleLoading || !hasAccess) {
     return (
@@ -226,12 +229,15 @@ export default function AdminIuranPage() {
                         </div>
                       </td>
                       <td className="p-4">
-                        <Badge variant="outline">
-                          {new Date(item.bulan_tahun).toLocaleDateString('id-ID', {
-                            month: 'long',
-                            year: 'numeric'
-                          })}
-                        </Badge>
+                        <div className="inline-flex items-center px-3 py-2 rounded-lg bg-gradient-to-r from-primary-500/10 to-primary-600/10 backdrop-blur-sm border border-primary-300/30 dark:border-primary-500/30">
+                          <Calendar className="h-4 w-4 text-primary-600 dark:text-primary-400 mr-2" />
+                          <span className="text-sm font-semibold text-primary-900 dark:text-primary-100">
+                            {new Date(item.bulan_tahun).toLocaleDateString('id-ID', {
+                              month: 'long',
+                              year: 'numeric'
+                            })}
+                          </span>
+                        </div>
                       </td>
                       <td className="p-4">
                         <span className="font-semibold text-green-600 dark:text-green-400">
@@ -239,14 +245,33 @@ export default function AdminIuranPage() {
                         </span>
                       </td>
                       <td className="p-4">
-                        <div className="text-sm text-gray-600 dark:text-gray-300">
+                        <div className="space-y-1">
                           {[
-                            item.iuran_1 > 0 ? `1: ${formatCurrency(item.iuran_1)}` : null,
-                            item.iuran_2 > 0 ? `2: ${formatCurrency(item.iuran_2)}` : null,
-                            item.iuran_3 > 0 ? `3: ${formatCurrency(item.iuran_3)}` : null,
-                            item.iuran_4 > 0 ? `4: ${formatCurrency(item.iuran_4)}` : null,
-                            item.iuran_5 > 0 ? `5: ${formatCurrency(item.iuran_5)}` : null,
-                          ].filter(Boolean).join(' • ') || 'Tidak ada iuran'}
+                            item.iuran_1 > 0 ? { label: '1', amount: item.iuran_1 } : null,
+                            item.iuran_2 > 0 ? { label: '2', amount: item.iuran_2 } : null,
+                            item.iuran_3 > 0 ? { label: '3', amount: item.iuran_3 } : null,
+                            item.iuran_4 > 0 ? { label: '4', amount: item.iuran_4 } : null,
+                            item.iuran_5 > 0 ? { label: '5', amount: item.iuran_5 } : null,
+                          ].filter(Boolean).length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {[
+                                item.iuran_1 > 0 ? { label: '1', amount: item.iuran_1 } : null,
+                                item.iuran_2 > 0 ? { label: '2', amount: item.iuran_2 } : null,
+                                item.iuran_3 > 0 ? { label: '3', amount: item.iuran_3 } : null,
+                                item.iuran_4 > 0 ? { label: '4', amount: item.iuran_4 } : null,
+                                item.iuran_5 > 0 ? { label: '5', amount: item.iuran_5 } : null,
+                              ].filter(Boolean).map((iuran, index) => (
+                                <div key={index} className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-green-100/80 dark:bg-green-900/30 border border-green-200/50 dark:border-green-700/50">
+                                  <span className="text-green-800 dark:text-green-200 font-semibold mr-1">#{iuran.label}:</span>
+                                  <span className="text-green-700 dark:text-green-300">{formatCurrency(iuran.amount)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-gray-100/80 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 text-gray-600 dark:text-gray-400">
+                              Tidak ada iuran
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="p-4 text-gray-600 dark:text-gray-400">
@@ -257,9 +282,10 @@ export default function AdminIuranPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            title="Lihat detail"
+                            title="Edit iuran"
+                            onClick={() => setEditingIuran(item)}
                           >
-                            <Eye className="h-4 w-4" />
+                            <Edit className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="destructive"
@@ -278,6 +304,14 @@ export default function AdminIuranPage() {
           )}
         </CardContent>
       </Card>
+
+      <EditIuranForm
+        isOpen={!!editingIuran}
+        onClose={() => setEditingIuran(null)}
+        iuranData={editingIuran}
+        currentUserId={user?.id}
+        currentUserRole={user?.role}
+      />
     </div>
   );
 }

@@ -152,3 +152,55 @@ export function useUserSubmissionForMonth(userId: string, monthYear: string) {
     enabled: !!(userId && monthYear),
   });
 }
+
+export function useUpdateIuran() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...updateData
+    }: {
+      id: string;
+      iuran_1?: number;
+      iuran_2?: number;
+      iuran_3?: number;
+      iuran_4?: number;
+      iuran_5?: number;
+      total_iuran?: number;
+    }) => {
+      try {
+        console.log('Updating iuran:', { id, updateData });
+        
+        // Remove total_iuran from updateData since it's computed in the database
+        const { total_iuran, ...dataWithoutTotal } = updateData;
+        
+        const { data, error } = await supabase
+          .from('iuran_submissions')
+          .update(dataWithoutTotal)
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Supabase update error:', error);
+          throw new Error(`Database error: ${error.message || 'Unknown error'}`);
+        }
+
+        return data;
+      } catch (err) {
+        if (err instanceof Error) {
+          throw err;
+        }
+        throw new Error('Terjadi kesalahan yang tidak diketahui saat mengupdate iuran');
+      }
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['iuran'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ 
+        queryKey: ['user-submission', result.user_id, result.bulan_tahun] 
+      });
+    },
+  });
+}

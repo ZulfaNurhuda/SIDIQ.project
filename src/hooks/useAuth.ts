@@ -19,7 +19,29 @@ export function useAuth() {
     try {
       setLoading(true);
       
-      // Call custom authentication function
+      // First check if username exists
+      const { data: userCheck, error: userCheckError } = await supabase
+        .from('users')
+        .select('id, username, is_active')
+        .eq('username', username)
+        .maybeSingle();
+
+      if (userCheckError) {
+        console.error('User check error:', userCheckError);
+        throw new Error(`Database error: ${userCheckError.message}`);
+      }
+
+      // If user doesn't exist
+      if (!userCheck) {
+        throw new Error('USER_NOT_FOUND');
+      }
+
+      // If user is not active
+      if (!userCheck.is_active) {
+        throw new Error('USER_INACTIVE');
+      }
+
+      // Now try to authenticate with the RPC function
       const { data, error } = await supabase.rpc('authenticate_user', {
         input_username: username,
         input_password: password
@@ -46,18 +68,25 @@ export function useAuth() {
         setUser(user);
         return { success: true };
       } else {
-        throw new Error('Username atau password salah. Pastikan sudah menjalankan SQL setup di Supabase.');
+        // If we get here, username exists but password is wrong
+        throw new Error('WRONG_PASSWORD');
       }
     } catch (error: any) {
       console.error('Login error:', error);
       let errorMessage = 'Terjadi kesalahan sistem';
       
-      if (error.message?.includes('Database error')) {
-        errorMessage = 'Koneksi database gagal. Periksa konfigurasi Supabase.';
-      } else if (error.message?.includes('Username atau password salah')) {
-        errorMessage = 'Username atau password salah. Pastikan SQL setup sudah dijalankan.';
+      if (error.message === 'USER_NOT_FOUND') {
+        errorMessage = '❌ Username tidak ditemukan. Periksa kembali username Anda.';
+      } else if (error.message === 'USER_INACTIVE') {
+        errorMessage = '🚫 Akun Anda tidak aktif. Hubungi administrator untuk mengaktifkan akun.';
+      } else if (error.message === 'WRONG_PASSWORD') {
+        errorMessage = '🔒 Password salah. Periksa kembali password Anda.';
+      } else if (error.message?.includes('Database error')) {
+        errorMessage = '🔧 Koneksi database gagal. Periksa konfigurasi Supabase.';
       } else if (error.message?.includes('Failed to fetch')) {
-        errorMessage = 'Tidak dapat terhubung ke server. Periksa URL Supabase.';
+        errorMessage = '🌐 Tidak dapat terhubung ke server. Periksa URL Supabase.';
+      } else {
+        errorMessage = '⚠️ Terjadi kesalahan sistem. Silakan coba lagi.';
       }
       
       return { 
@@ -93,6 +122,7 @@ export function useAuth() {
     isLoading,
     login,
     logout: signOut,
+    setUser,
   };
 }
 

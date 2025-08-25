@@ -136,7 +136,9 @@ export default function UsersPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">
-              <Users className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+              <div className="h-8 w-8 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center">
+                <Users className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total User</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">

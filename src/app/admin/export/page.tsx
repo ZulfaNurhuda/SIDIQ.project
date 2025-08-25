@@ -177,7 +177,7 @@ export default function ExportPage() {
             >
               <FileText className="h-8 w-8" />
               <div className="text-center">
-                <div className="font-semibold">Excel (XLSX)</div>
+                <div className="font-semibold">XLSX</div>
                 <div className="text-xs opacity-80">Spreadsheet format</div>
               </div>
             </Button>
@@ -200,7 +200,7 @@ export default function ExportPage() {
               onClick={() => handleExport('json')}
               disabled={isExporting || filteredData.length === 0}
               isLoading={isExporting}
-              variant="outline"
+              variant="default"
               className="h-auto p-6 flex-col space-y-2"
             >
               <FileText className="h-8 w-8" />
@@ -214,7 +214,7 @@ export default function ExportPage() {
               onClick={() => handleExport('xml')}
               disabled={isExporting || filteredData.length === 0}
               isLoading={isExporting}
-              variant="ghost"
+              variant="secondary"
               className="h-auto p-6 flex-col space-y-2"
             >
               <FileText className="h-8 w-8" />

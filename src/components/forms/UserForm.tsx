@@ -16,7 +16,10 @@ const userSchema = z.object({
     .min(3, 'Username minimal 3 karakter')
     .regex(/^[a-zA-Z0-9._]+$/, 'Username hanya boleh berisi huruf, angka, titik (.), dan underscore (_)'),
   full_name: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
-  role: z.enum(['admin', 'jamaah'], { required_error: 'Role harus dipilih' }),
+  role: z.enum(['admin', 'jamaah'], { 
+    required_error: 'Role harus dipilih',
+    invalid_type_error: 'Role harus dipilih. Silakan pilih Admin atau Jamaah.'
+  }),
   password: z.string()
     .min(6, 'Password minimal 6 karakter')
     .regex(/^(?=.*[a-zA-Z])(?=.*\d)/, 'Password harus mengandung huruf dan angka'),
@@ -53,33 +56,47 @@ export function UserForm({ isOpen, onClose }: UserFormProps) {
     setErrorMessage('');
     setSuccessMessage('');
     
-    try {
-      const result = await createUserMutation.mutateAsync({
-        username: data.username,
-        full_name: data.full_name,
-        role: data.role,
-        password: data.password,
-      });
-      
-      if (result?.is_reactivated) {
-        setSuccessMessage(
-          `User "${data.username}" berhasil direaktifkan! Data iuran sebelumnya telah tersambung kembali.`
-        );
-      } else {
-        setSuccessMessage(`User "${data.username}" berhasil dibuat!`);
+    // Alternative: Use the mutation directly with onSuccess/onError callbacks
+    createUserMutation.mutate({
+      username: data.username,
+      full_name: data.full_name,
+      role: data.role,
+      password: data.password,
+    }, {
+      onSuccess: (result) => {
+        if (result?.is_reactivated) {
+          setSuccessMessage(
+            `User "${data.username}" berhasil direaktifkan! Data iuran sebelumnya telah tersambung kembali.`
+          );
+        } else {
+          setSuccessMessage(`User "${data.username}" berhasil dibuat!`);
+        }
+        
+        // Auto close after 2 seconds
+        setTimeout(() => {
+          reset();
+          setSuccessMessage('');
+          onClose();
+        }, 2000);
+      },
+      onError: (error: any) => {
+        console.error('Error creating user:', error);
+        
+        // Enhanced error handling for better debugging
+        let displayError = 'Gagal membuat user';
+        
+        if (error?.message) {
+          displayError = error.message;
+        } else if (error?.error?.message) {
+          displayError = error.error.message;
+        } else if (typeof error === 'string') {
+          displayError = error;
+        }
+        
+        console.log('Setting error message:', displayError); // Debug log
+        setErrorMessage(displayError);
       }
-      
-      // Auto close after 2 seconds
-      setTimeout(() => {
-        reset();
-        setSuccessMessage('');
-        onClose();
-      }, 2000);
-      
-    } catch (error: any) {
-      console.error('Error creating user:', error);
-      setErrorMessage(error.message || 'Gagal membuat user');
-    }
+    });
   };
 
   const handleClose = () => {
@@ -140,56 +157,76 @@ export function UserForm({ isOpen, onClose }: UserFormProps) {
           <label className="text-caption text-gray-700 dark:text-gray-300">
             Role
           </label>
-          <select
-            {...register('role')}
-            className="glass-input font-normal text-base w-full"
-            disabled={createUserMutation.isPending}
-          >
-            <option value="">Pilih role</option>
-            <option value="admin">Admin</option>
-            <option value="jamaah">Jamaah</option>
-          </select>
+          <div className="relative">
+            <select
+              {...register('role')}
+              className="glass-select font-normal text-base w-full pr-10"
+              disabled={createUserMutation.isPending}
+            >
+              <option value="admin">Admin</option>
+              <option value="jamaah">Jamaah</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
           {errors.role && (
             <p className="text-sm text-red-600 dark:text-red-400">{errors.role.message}</p>
           )}
         </div>
 
-        <div className="relative">
-          <Input
-            label="Password"
-            type={showPassword ? 'text' : 'password'}
-            {...register('password')}
-            error={errors.password?.message}
-            placeholder="Masukkan password"
-            disabled={createUserMutation.isPending}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            disabled={createUserMutation.isPending}
-          >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
+        <div className="space-y-2">
+          <label className="text-caption text-gray-700 dark:text-gray-300">
+            Password
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              className="glass-input font-normal text-base w-full pr-10"
+              placeholder="Masukkan password"
+              disabled={createUserMutation.isPending}
+              {...register('password')}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              disabled={createUserMutation.isPending}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+          {errors.password?.message && (
+            <p className="text-sm text-red-600 dark:text-red-400">{errors.password?.message}</p>
+          )}
         </div>
 
-        <div className="relative">
-          <Input
-            label="Konfirmasi Password"
-            type={showConfirmPassword ? 'text' : 'password'}
-            {...register('confirmPassword')}
-            error={errors.confirmPassword?.message}
-            placeholder="Konfirmasi password"
-            disabled={createUserMutation.isPending}
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            disabled={createUserMutation.isPending}
-          >
-            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
+        <div className="space-y-2">
+          <label className="text-caption text-gray-700 dark:text-gray-300">
+            Konfirmasi Password
+          </label>
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? 'text' : 'password'}
+              className="glass-input font-normal text-base w-full pr-10"
+              placeholder="Konfirmasi password"
+              disabled={createUserMutation.isPending}
+              {...register('confirmPassword')}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              disabled={createUserMutation.isPending}
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+          {errors.confirmPassword?.message && (
+            <p className="text-sm text-red-600 dark:text-red-400">{errors.confirmPassword?.message}</p>
+          )}
         </div>
 
         <div className="flex space-x-4 pt-4">

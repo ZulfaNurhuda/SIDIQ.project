@@ -8,14 +8,18 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { Card, CardContent } from '@/components/ui/Card';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { useUpdateUser } from '@/hooks/useUsers';
+import { useAuth } from '@/hooks/useAuth';
 import { UserPen, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { User } from '@/types';
 
 const editUserSchema = z.object({
-  username: z.string(), // Username is readonly, no validation needed
   full_name: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
-  role: z.enum(['admin', 'jamaah'], { required_error: 'Role harus dipilih' }),
+  role: z.enum(['admin', 'jamaah', 'superadmin'], { 
+    required_error: 'Role harus dipilih',
+    invalid_type_error: 'Role harus dipilih. Silakan pilih Admin atau Jamaah.'
+  }),
   password: z.string()
     .optional()
     .or(z.string().min(6, 'Password minimal 6 karakter').regex(/^(?=.*[a-zA-Z])(?=.*\d)/, 'Password harus mengandung huruf dan angka')),
@@ -43,7 +47,10 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [pendingData, setPendingData] = useState<EditUserFormData | null>(null);
   const updateUserMutation = useUpdateUser();
+  const { user: currentUser, setUser } = useAuth();
 
   const {
     register,
@@ -51,62 +58,102 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<EditUserFormData>({
     resolver: zodResolver(editUserSchema),
   });
+
 
   // Populate form when user changes
   useEffect(() => {
     if (user && isOpen) {
       // Username is read-only, so we don't need to set it via form
       setValue('full_name', user.full_name);
-      setValue('role', user.role as 'admin' | 'jamaah');
+      setValue('role', user.role as 'admin' | 'jamaah' | 'superadmin');
       setValue('password', '');
       setValue('confirmPassword', '');
     }
   }, [user, isOpen, setValue]);
 
-  const onSubmit = async (data: EditUserFormData) => {
+  const onSubmit = (data: EditUserFormData) => {
     if (!user) return;
+    
+    // Show confirmation dialog
+    setPendingData(data);
+    setShowConfirmation(true);
+  };
+
+  const handleConfirmUpdate = async () => {
+    if (!user || !pendingData) return;
     
     setErrorMessage('');
     setSuccessMessage('');
+    setShowConfirmation(false);
     
-    try {
-      const updateData: any = {
-        id: user.id,
-        // Username is not included since it's readonly
-        full_name: data.full_name,
-        role: data.role,
-      };
+    const updateData: any = {
+      id: user.id,
+      // Username is not included since it's readonly
+      full_name: pendingData.full_name,
+      role: pendingData.role,
+    };
 
-      // Only include password if it's provided
-      if (data.password && data.password.length > 0) {
-        updateData.password = data.password;
-      }
-
-      await updateUserMutation.mutateAsync(updateData);
-      
-      setSuccessMessage(`User "${data.username}" berhasil diupdate!`);
-      
-      // Auto close after 2 seconds
-      setTimeout(() => {
-        reset();
-        setSuccessMessage('');
-        onClose();
-      }, 2000);
-      
-    } catch (error: any) {
-      console.error('Error updating user:', error);
-      setErrorMessage(error.message || 'Gagal mengupdate user');
+    // Only include password if it's provided
+    if (pendingData.password && pendingData.password.length > 0) {
+      updateData.password = pendingData.password;
     }
+
+    updateUserMutation.mutate(updateData, {
+      onSuccess: () => {
+        // Update current user state if editing own profile
+        if (currentUser && user.id === currentUser.id) {
+          setUser({
+            ...currentUser,
+            full_name: pendingData.full_name,
+            role: pendingData.role,
+          });
+        }
+        
+        setSuccessMessage(`User "${user.username}" berhasil diupdate!`);
+        
+        // Auto close after 2 seconds
+        setTimeout(() => {
+          reset();
+          setSuccessMessage('');
+          onClose();
+        }, 2000);
+      },
+      onError: (error: any) => {
+        console.error('Error updating user:', error);
+        
+        // Enhanced error handling for better debugging
+        let displayError = 'Gagal mengupdate user';
+        
+        if (error?.message) {
+          displayError = error.message;
+        } else if (error?.error?.message) {
+          displayError = error.error.message;
+        } else if (typeof error === 'string') {
+          displayError = error;
+        }
+        
+        console.log('Setting error message:', displayError); // Debug log
+        setErrorMessage(displayError);
+      }
+    });
   };
 
   const handleClose = () => {
     reset();
     setErrorMessage('');
     setSuccessMessage('');
+    setShowConfirmation(false);
+    setPendingData(null);
     onClose();
+  };
+
+  const handleCancelConfirmation = () => {
+    setShowConfirmation(false);
+    setPendingData(null);
   };
 
   if (!user) return null;
@@ -171,17 +218,42 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
           <label className="text-caption text-gray-700 dark:text-gray-300">
             Role
           </label>
-          <select
-            {...register('role')}
-            className="glass-input font-normal text-base w-full"
-            disabled={updateUserMutation.isPending}
-          >
-            <option value="">Pilih role</option>
-            <option value="admin">Admin</option>
-            <option value="jamaah">Jamaah</option>
-          </select>
-          {errors.role && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.role.message}</p>
+          {user.role === 'superadmin' ? (
+            <>
+              <input
+                type="text"
+                value="Superadmin"
+                disabled={true}
+                className="glass-input font-normal text-base w-full bg-gray-100/70 dark:bg-gray-800/70 cursor-not-allowed"
+                title="Role SUPERADMIN tidak dapat diubah"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 flex items-start space-x-1">
+                <span className="text-amber-500 mt-0.5">ⓘ</span>
+                <span>Role SUPERADMIN tidak dapat diubah untuk menjaga keamanan sistem</span>
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="relative">
+                <select
+                  {...register('role')}
+                  className="glass-select font-normal text-base w-full pr-10"
+                  disabled={updateUserMutation.isPending}
+                  defaultValue={user.role}
+                >
+                  <option value="admin">Admin</option>
+                  <option value="jamaah">Jamaah</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              {errors.role && (
+                <p className="text-sm text-red-600 dark:text-red-400">{errors.role.message}</p>
+              )}
+            </>
           )}
         </div>
 
@@ -194,42 +266,56 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
             <div className="h-px bg-gray-300 dark:bg-gray-600 flex-1"></div>
           </div>
 
-          <div className="relative">
-            <Input
-              label="Password Baru"
-              type={showPassword ? 'text' : 'password'}
-              {...register('password')}
-              error={errors.password?.message}
-              placeholder="Kosongkan jika tidak ingin mengubah"
-              disabled={updateUserMutation.isPending}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              disabled={updateUserMutation.isPending}
-            >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
+          <div className="space-y-2">
+            <label className="text-caption text-gray-700 dark:text-gray-300">
+              Password Baru
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="glass-input font-normal text-base w-full pr-10"
+                placeholder="Kosongkan jika tidak ingin mengubah"
+                disabled={updateUserMutation.isPending}
+                {...register('password')}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                disabled={updateUserMutation.isPending}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {errors.password?.message && (
+              <p className="text-sm text-red-600 dark:text-red-400">{errors.password?.message}</p>
+            )}
           </div>
 
-          <div className="relative">
-            <Input
-              label="Konfirmasi Password Baru"
-              type={showConfirmPassword ? 'text' : 'password'}
-              {...register('confirmPassword')}
-              error={errors.confirmPassword?.message}
-              placeholder="Konfirmasi password baru"
-              disabled={updateUserMutation.isPending}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              disabled={updateUserMutation.isPending}
-            >
-              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
+          <div className="space-y-2">
+            <label className="text-caption text-gray-700 dark:text-gray-300">
+              Konfirmasi Password Baru
+            </label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                className="glass-input font-normal text-base w-full pr-10"
+                placeholder="Konfirmasi password baru"
+                disabled={updateUserMutation.isPending}
+                {...register('confirmPassword')}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                disabled={updateUserMutation.isPending}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {errors.confirmPassword?.message && (
+              <p className="text-sm text-red-600 dark:text-red-400">{errors.confirmPassword?.message}</p>
+            )}
           </div>
         </div>
 
@@ -254,6 +340,18 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
           </Button>
         </div>
       </form>
+
+      <ConfirmationModal
+        isOpen={showConfirmation}
+        onClose={handleCancelConfirmation}
+        onConfirm={handleConfirmUpdate}
+        title="Konfirmasi Update User"
+        message={`Apakah Anda yakin ingin mengupdate data user "${user.username}"?`}
+        confirmText="Update User"
+        cancelText="Batal"
+        isLoading={updateUserMutation.isPending}
+        variant="primary"
+      />
     </Modal>
   );
 }

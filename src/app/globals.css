@@ -37,6 +37,19 @@ body {
   .glass-nav {
     @apply bg-white/80 dark:bg-black/80 backdrop-blur-lg border-b border-white/20 dark:border-white/10;
   }
+  
+  .glass-select {
+    @apply glass-input appearance-none cursor-pointer;
+  }
+  
+  .glass-select option {
+    @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .glass-select option:hover {
+    @apply bg-gray-50 dark:bg-gray-700;
+  }
 }
 
 @layer utilities {
