@@ -1,0 +1,358 @@
+'use client';
+
+import { useState } from 'react';
+import { useUsers, useDeleteUser } from '@/hooks/useUsers';
+import { useAuth } from '@/hooks/useAuth';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import { UserForm } from '@/components/forms/UserForm';
+import { EditUserForm } from '@/components/forms/EditUserForm';
+import { User } from '@/types';
+import { Users, UserPlus, Trash2, Edit, AlertCircle } from 'lucide-react';
+import { formatDate } from '@/lib/utils';
+
+export default function UsersPage() {
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    userId: string;
+    userName: string;
+  }>({ isOpen: false, userId: '', userName: '' });
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const { user: currentUser } = useAuth();
+  const { data: users, isLoading } = useUsers();
+  const deleteUserMutation = useDeleteUser();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  const handleDeleteUser = (userId: string, userName: string) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      userId,
+      userName
+    });
+    setErrorMessage(''); // Clear any previous errors
+  };
+
+  const confirmDeleteUser = async () => {
+    try {
+      await deleteUserMutation.mutateAsync(deleteConfirmation.userId);
+      setDeleteConfirmation({ isOpen: false, userId: '', userName: '' });
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      setErrorMessage(
+        error?.message || 'Gagal menghapus user. Silakan coba lagi.'
+      );
+      // Don't close the modal so user can see the error
+    }
+  };
+
+  const cancelDeleteUser = () => {
+    setDeleteConfirmation({ isOpen: false, userId: '', userName: '' });
+    setErrorMessage('');
+  };
+
+  const closeEditUser = () => {
+    setEditUser(null);
+    setErrorMessage('');
+  };
+
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case 'superadmin':
+        return 'error';
+      case 'admin':
+        return 'warning';
+      case 'jamaah':
+        return 'success';
+      default:
+        return 'default';
+    }
+  };
+
+  const canDeleteUser = (user: any) => {
+    // SUPERADMIN tidak bisa dihapus oleh siapapun
+    if (user.role === 'superadmin') return false;
+    // User tidak bisa menghapus diri sendiri
+    if (user.id === currentUser?.id) return false;
+    // ADMIN tidak bisa menghapus ADMIN lain atau SUPERADMIN
+    if (currentUser?.role === 'admin' && (user.role === 'admin' || user.role === 'superadmin')) return false;
+    return true;
+  };
+
+  const canEditUser = (user: any) => {
+    // SUPERADMIN bisa edit semua kecuali tidak bisa edit diri sendiri untuk role
+    if (currentUser?.role === 'superadmin') return true;
+    // ADMIN hanya bisa edit JAMAAH, tidak bisa edit SUPERADMIN atau ADMIN lain
+    if (currentUser?.role === 'admin') {
+      if (user.role === 'superadmin' || user.role === 'admin') return false;
+      return true;
+    }
+    return false;
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditUser(user);
+    setErrorMessage(''); // Clear any previous errors
+  };
+
+  const filteredUsers = users?.filter(user => {
+    // SUPERADMIN bisa lihat semua
+    if (currentUser?.role === 'superadmin') return true;
+    // ADMIN bisa lihat semua user tapi tidak bisa edit/hapus SUPERADMIN dan ADMIN lain
+    if (currentUser?.role === 'admin') return true;
+    return false;
+  }) || [];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-heading-1 text-gray-900 dark:text-white mb-2">
+            Manajemen User
+          </h1>
+          <p className="text-body text-gray-600 dark:text-gray-300">
+            Kelola user admin dan jamaah
+          </p>
+        </div>
+        <Button onClick={() => setShowUserForm(true)}>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Tambah User
+        </Button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <Users className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total User</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {users?.length || 0}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <div className="h-8 w-8 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                <span className="text-red-600 dark:text-red-400 font-bold text-sm">SA</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">SUPERADMIN</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {users?.filter(u => u.role === 'superadmin').length || 0}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <div className="h-8 w-8 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center">
+                <span className="text-yellow-600 dark:text-yellow-400 font-bold text-sm">A</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">ADMIN</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {users?.filter(u => u.role === 'admin').length || 0}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <div className="h-8 w-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                <span className="text-green-600 dark:text-green-400 font-bold text-sm">J</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">JAMAAH</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {users?.filter(u => u.role === 'jamaah').length || 0}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* User List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Daftar User</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {filteredUsers.length === 0 ? (
+            <p className="text-center py-8 text-gray-600 dark:text-gray-300">
+              Belum ada user yang terdaftar
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="text-left p-4">Username</th>
+                    <th className="text-left p-4">Nama Lengkap</th>
+                    <th className="text-left p-4">Role</th>
+                    <th className="text-left p-4">Dibuat</th>
+                    <th className="text-right p-4">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsers.map((user) => (
+                    <tr key={user.id} className="border-b border-gray-100 dark:border-gray-800">
+                      <td className="p-4">
+                        <span className="font-medium text-gray-900 dark:text-white">
+                          {user.username}
+                        </span>
+                        {user.id === currentUser?.id && (
+                          <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">
+                            (Anda)
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-4 text-gray-700 dark:text-gray-300">
+                        {user.full_name}
+                      </td>
+                      <td className="p-4">
+                        <Badge variant={getRoleBadgeVariant(user.role)}>
+                          {user.role.toUpperCase()}
+                        </Badge>
+                      </td>
+                      <td className="p-4 text-gray-600 dark:text-gray-400">
+                        {formatDate(new Date(user.created_at))}
+                      </td>
+                      <td className="p-4 text-right">
+                        <div className="flex justify-end space-x-2">
+                          {canEditUser(user) ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditUser(user)}
+                              title="Edit user"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={true}
+                              title={
+                                user.role === 'superadmin'
+                                  ? 'SUPERADMIN hanya bisa diedit oleh SUPERADMIN lain'
+                                  : user.role === 'admin'
+                                  ? 'ADMIN tidak dapat mengedit ADMIN lain'
+                                  : 'Anda tidak memiliki permission untuk mengedit user ini'
+                              }
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {canDeleteUser(user) ? (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteUser(user.id, user.username)}
+                              disabled={deleteUserMutation.isPending}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              disabled={true}
+                              title={
+                                user.role === 'superadmin' 
+                                  ? 'SUPERADMIN tidak dapat dihapus' 
+                                  : user.id === currentUser?.id 
+                                  ? 'Tidak dapat menghapus akun sendiri'
+                                  : 'Anda tidak memiliki permission untuk menghapus user ini'
+                              }
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <UserForm
+        isOpen={showUserForm}
+        onClose={() => setShowUserForm(false)}
+      />
+
+      <EditUserForm
+        isOpen={!!editUser}
+        onClose={closeEditUser}
+        user={editUser}
+      />
+
+      <ConfirmationModal
+        isOpen={deleteConfirmation.isOpen}
+        onClose={cancelDeleteUser}
+        onConfirm={confirmDeleteUser}
+        title="Konfirmasi Hapus User"
+        message={`Apakah Anda yakin ingin menghapus user "${deleteConfirmation.userName}"? User akan di-soft delete dan data iuran akan disembunyikan hingga username yang sama ditambahkan kembali.`}
+        confirmText="Hapus User"
+        cancelText="Batal"
+        isLoading={deleteUserMutation.isPending}
+        variant="danger"
+      />
+
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <Card className="bg-red-50/80 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+            <CardContent className="p-4">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm text-red-700 dark:text-red-300 font-medium">
+                    {errorMessage}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setErrorMessage('')}
+                    className="mt-2"
+                  >
+                    Tutup
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
