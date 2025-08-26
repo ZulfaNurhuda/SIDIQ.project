@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SIDIQ - Sistem Informasi Pengelolaan Data Infaq
+
+SIDIQ (Sistem Informasi Pengelolaan Data Infaq) adalah aplikasi web untuk mengelola data infaq jamaah. Aplikasi ini dibangun menggunakan Next.js dengan sistem autentikasi custom dan database PostgreSQL melalui Supabase.
 
 ## Getting Started
 
@@ -18,7 +20,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Aplikasi ini menggunakan font Lexend untuk optimal readability dan menerapkan glassmorphism design dengan dark/light mode support.
 
 ## Learn More
 

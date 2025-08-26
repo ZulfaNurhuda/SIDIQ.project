@@ -1,4 +1,4 @@
-# Setup Instructions - Sistem Informasi Infaq Bulanan
+# Setup Instructions - SIDIQ (Sistem Informasi Pengelolaan Data Infaq)
 
 ## Prerequisites
 
@@ -11,7 +11,7 @@
 ```bash
 # Clone repository
 git clone <repository-url>
-cd barokah-project
+cd sidiq-project
 
 # Install dependencies
 npm install

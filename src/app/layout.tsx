@@ -12,8 +12,8 @@ const lexend = Lexend({
 });
 
 export const metadata: Metadata = {
-  title: "Sistem Informasi Infaq Bulanan",
-  description: "Kelompok 3 - Jatiluhur - Sistem pengelolaan iuran anggota jamaah",
+  title: "SIDIQ - Sistem Informasi Pengelolaan Data Infaq",
+  description: "SIDIQ (Sistem Informasi Pengelolaan Data Infaq) - Kelompok 3 - Jatiluhur - Sistem pengelolaan iuran anggota jamaah",
 };
 
 export default function RootLayout({

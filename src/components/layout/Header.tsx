@@ -30,7 +30,7 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
             <h1 className="text-heading-3 text-gray-900 dark:text-white font-semibold">
-              Sistem Infaq
+              SIDIQ
             </h1>
             <Badge variant={getRoleBadgeVariant(user.role)}>
               {user.role.toUpperCase()}

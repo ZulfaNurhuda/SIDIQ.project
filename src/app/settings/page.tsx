@@ -224,7 +224,7 @@ export default function SettingsPage() {
         String(now.getMinutes()).padStart(2, '0') + '-' +
         String(now.getSeconds()).padStart(2, '0');
       a.href = url;
-      a.download = `barokah_backup_${timestamp}.json`;
+      a.download = `sidiq_backup_${timestamp}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

@@ -21,6 +21,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { Select } from '@/components/ui/Select';
 
 export default function AdminIuranPage() {
   const { hasAccess, isLoading: roleLoading } = useRequireRole(['superadmin', 'admin']);
@@ -206,7 +207,7 @@ export default function AdminIuranPage() {
       )}
 
       {/* Filters */}
-      <Card>
+      <Card className="relative z-30">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -230,15 +231,17 @@ export default function AdminIuranPage() {
               />
             </div>
 
-            <select
+            <Select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'date' | 'amount' | 'name')}
-              className="glass-select font-normal text-base w-full md:w-48"
-            >
-              <option value="date">Terbaru</option>
-              <option value="amount">Terbesar</option>
-              <option value="name">Nama A-Z</option>
-            </select>
+              onChange={(val) => setSortBy(val as 'date' | 'amount' | 'name')}
+              options={[
+                { value: 'date', label: 'Terbaru' },
+                { value: 'amount', label: 'Terbesar' },
+                { value: 'name', label: 'Nama A-Z' },
+              ]}
+              className="w-full md:w-48"
+              buttonClassName="font-normal text-base"
+            />
 
             <Button
               variant="outline"

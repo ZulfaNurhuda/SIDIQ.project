@@ -12,6 +12,7 @@ import { useUpdateUser } from '@/hooks/useUsers';
 import { useAuth } from '@/hooks/useAuth';
 import { UserPen, Eye, EyeOff, AlertCircle, CheckCircle, Shield } from 'lucide-react';
 import { User } from '@/types';
+import { Select } from '@/components/ui/Select';
 
 const editUserSchema = z.object({
   full_name: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
@@ -240,22 +241,17 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
             </>
           ) : (
             <>
-              <div className="relative">
-                <select
-                  {...register('role')}
-                  className="glass-select font-normal text-base w-full pr-10"
-                  disabled={updateUserMutation.isPending || showConfirmation}
-                  defaultValue={user.role}
-                >
-                  <option value="admin">Admin</option>
-                  <option value="jamaah">Jamaah</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
+              <Select
+                value={watch('role') || user.role}
+                onChange={(val) => setValue('role', val as 'admin' | 'jamaah', { shouldValidate: true, shouldDirty: true })}
+                options={[
+                  { value: 'admin', label: 'Admin' },
+                  { value: 'jamaah', label: 'Jamaah' },
+                ]}
+                className="w-full"
+                buttonClassName="font-normal text-base"
+                disabled={updateUserMutation.isPending || showConfirmation}
+              />
               {errors.role && (
                 <p className="text-sm text-red-600 dark:text-red-400">{errors.role.message}</p>
               )}

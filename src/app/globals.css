@@ -50,6 +50,16 @@ body {
   .glass-select option:hover {
     @apply bg-gray-50 dark:bg-gray-700;
   }
+
+  /* Glassmorphism dropdown panel */
+  .glass-dropdown {
+    /* Stronger frosted effect + more solid base for readability */
+    @apply bg-white/85 dark:bg-gray-900/85 bg-gradient-to-br from-white/40 to-white/20 dark:from-gray-900/50 dark:to-gray-900/30 backdrop-blur-3xl backdrop-saturate-150 backdrop-brightness-75 backdrop-contrast-125 border border-white/30 dark:border-white/10 shadow-2xl ring-1 ring-white/20 dark:ring-white/10 rounded-lg;
+  }
+
+  .glass-dropdown-item {
+    @apply text-gray-900 dark:text-gray-100 rounded-md transition-colors duration-150 hover:bg-primary-500/10 dark:hover:bg-white/10 cursor-pointer;
+  }
 }
 
 @layer utilities {

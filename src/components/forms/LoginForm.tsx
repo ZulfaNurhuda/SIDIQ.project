@@ -54,9 +54,12 @@ export function LoginForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="text-center">
           <h1 className="text-heading-1 text-gray-900 dark:text-white mb-2">
-            Sistem Informasi Infaq Bulanan
+            SIDIQ
           </h1>
-          <p className="text-body text-gray-600 dark:text-gray-300">
+          <p className="text-body text-gray-600 dark:text-gray-300 mb-1">
+            Sistem Informasi Pengelolaan Data Infaq
+          </p>
+          <p className="text-body-small text-gray-500 dark:text-gray-400">
             Kelompok 3 - Jatiluhur
           </p>
         </div>
