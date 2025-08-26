@@ -27,7 +27,6 @@ export function useAuth() {
         .maybeSingle();
 
       if (userCheckError) {
-        console.error('User check error:', userCheckError);
         throw new Error(`Database error: ${userCheckError.message}`);
       }
 
@@ -47,10 +46,7 @@ export function useAuth() {
         input_password: password
       });
 
-      console.log('Auth response:', { data, error }); // Debug log
-
       if (error) {
-        console.error('Supabase RPC error:', error);
         throw new Error(`Database error: ${error.message}`);
       }
 
@@ -72,7 +68,6 @@ export function useAuth() {
         throw new Error('WRONG_PASSWORD');
       }
     } catch (error: any) {
-      console.error('Login error:', error);
       let errorMessage = 'Terjadi kesalahan sistem';
       
       if (error.message === 'USER_NOT_FOUND') {
@@ -110,7 +105,6 @@ export function useAuth() {
       logout();
       router.push('/login');
     } catch (error) {
-      console.error('Error during logout:', error);
       logout();
       router.push('/login');
     }

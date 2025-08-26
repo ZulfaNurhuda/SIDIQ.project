@@ -80,8 +80,6 @@ export function UserForm({ isOpen, onClose }: UserFormProps) {
         }, 2000);
       },
       onError: (error: any) => {
-        console.error('Error creating user:', error);
-        
         // Enhanced error handling for better debugging
         let displayError = 'Gagal membuat user';
         
@@ -93,7 +91,6 @@ export function UserForm({ isOpen, onClose }: UserFormProps) {
           displayError = error;
         }
         
-        console.log('Setting error message:', displayError); // Debug log
         setErrorMessage(displayError);
       }
     });
@@ -110,7 +107,7 @@ export function UserForm({ isOpen, onClose }: UserFormProps) {
     <Modal isOpen={isOpen} onClose={handleClose} title="Tambah User Baru" size="md">
       {/* Success Message */}
       {successMessage && (
-        <Card className="bg-green-50/80 dark:bg-green-900/20 border-green-200 dark:border-green-800 mb-4">
+        <Card className="bg-green-500/20 dark:bg-green-900/20 border-green-400/60 dark:border-green-800 mb-4">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
               <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
@@ -124,7 +121,7 @@ export function UserForm({ isOpen, onClose }: UserFormProps) {
 
       {/* Error Message */}
       {errorMessage && (
-        <Card className="bg-red-50/80 dark:bg-red-900/20 border-red-200 dark:border-red-800 mb-4">
+        <Card className="bg-red-500/20 dark:bg-red-900/20 border-red-400/60 dark:border-red-800 mb-4">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
               <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />

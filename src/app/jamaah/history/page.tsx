@@ -118,7 +118,7 @@ export default function JamaahHistoryPage() {
 
       {/* Summary Statistics */}
       {userIuran.length > 0 && (
-        <Card className="bg-primary-50/50 dark:bg-primary-900/20">
+        <Card className="bg-blue-500/20 dark:bg-blue-900/20">
           <CardHeader>
             <CardTitle className="text-primary-900 dark:text-primary-100">
               Ringkasan

@@ -72,7 +72,7 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="w-64 glass-card h-[calc(100vh-4rem)] sticky top-16 flex flex-col">
+    <aside className="w-64 bg-blue-50/40 dark:bg-black/20 backdrop-blur-md border border-gray-300/70 dark:border-white/10 shadow-sm h-[calc(100vh-4rem)] sticky top-16 flex flex-col">
       <nav className="p-4 space-y-2 flex-1">
         {filteredItems.map((item) => {
           const isActive = pathname === item.href;
@@ -85,8 +85,8 @@ export function Sidebar() {
               className={cn(
                 'flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                 isActive
-                  ? 'bg-primary-500/20 text-primary-900 dark:text-primary-100 border border-primary-300/50'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-500/10 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-primary-500/20 text-primary-900 dark:text-primary-100 border border-primary-400/60 dark:border-primary-300/50'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-gray-500/10 hover:text-gray-900 dark:hover:text-white'
               )}
             >
               <Icon className="h-5 w-5" />
@@ -97,31 +97,24 @@ export function Sidebar() {
       </nav>
       
       {/* Footer Section */}
-      <div className="p-4 border-t border-white/20 dark:border-white/10 mt-auto">
-        <div className="text-center mb-2">
-          <div className="flex items-center justify-center space-x-2 mb-2">
-            <div className="w-6 h-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-md flex items-center justify-center">
-              <span className="text-white text-xs font-bold">S</span>
-            </div>
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
-              SIDIQ
-            </h4>
+      <div className="p-4 border-t border-gray-300/55 dark:border-white/10 mt-auto">
+        <div className="flex items-start space-x-3">
+          <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
+            <span className="text-white text-sm font-bold">S</span>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-            Sistem Informasi Pengelolaan Data Infaq
-          </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">
-            Kelompok 3 - Jatiluhur
-          </p>
-        </div>
-        
-        <div className="text-center">
-          <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">
-            © {new Date().getFullYear()} • v{packageJson.version}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center justify-center">
-            Built with <Heart className="h-3 w-3 mx-1 text-red-500 fill-current" /> for Jamaah
-          </p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center space-x-2 mb-1">
+              <h4 className="text-base font-bold text-gray-900 dark:text-white tracking-wide">
+                SIDIQ
+              </h4>
+              <div className="inline-flex items-center px-1.5 py-0.5 bg-blue-500/20 dark:bg-blue-900/20 rounded text-xs text-blue-700 dark:text-blue-300">
+                v{packageJson.version}
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+              Sistem Informasi Pengelolaan Data Infaq © {new Date().getFullYear()}
+            </p>
+          </div>
         </div>
       </div>
     </aside>

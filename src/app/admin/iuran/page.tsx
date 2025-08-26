@@ -18,7 +18,9 @@ import {
   DollarSign,
   Download,
   Edit,
-  Trash2
+  Trash2,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Select } from '@/components/ui/Select';
@@ -77,7 +79,6 @@ export default function AdminIuranPage() {
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error: any) {
-      console.error('Error deleting iuran:', error);
       setErrorMessage(error.message || 'Gagal menghapus data iuran');
       setDeleteConfirmation({ isOpen: false, iuranId: '', jamaahName: '', bulanTahun: '' });
     }
@@ -173,14 +174,10 @@ export default function AdminIuranPage() {
 
       {/* Success/Error Messages */}
       {successMessage && (
-        <Card className="bg-green-50/80 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+        <Card className="bg-green-500/20 dark:bg-green-900/20 border-green-400/60 dark:border-green-800">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-green-600 dark:text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-green-700 dark:text-green-300 font-medium">
                 {successMessage}
               </p>
@@ -190,14 +187,10 @@ export default function AdminIuranPage() {
       )}
 
       {errorMessage && (
-        <Card className="bg-red-50/80 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+        <Card className="bg-red-500/20 dark:bg-red-900/20 border-red-400/60 dark:border-red-800">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-600 dark:text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
+              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-red-700 dark:text-red-300 font-medium">
                 {errorMessage}
               </p>
@@ -280,7 +273,7 @@ export default function AdminIuranPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <tr className="border-b border-gray-400/80 dark:border-gray-700">
                     <th className="text-left p-4">Jamaah</th>
                     <th className="text-left p-4">Bulan</th>
                     <th className="text-left p-4">Total Iuran</th>
@@ -291,7 +284,7 @@ export default function AdminIuranPage() {
                 </thead>
                 <tbody>
                   {filteredData.map((item) => (
-                    <tr key={item.id} className="border-b border-gray-100 dark:border-gray-800">
+                    <tr key={item.id} className="border-b border-gray-300/65 dark:border-gray-800">
                       <td className="p-4">
                         <div>
                           <p className="font-semibold text-gray-900 dark:text-white">
@@ -342,7 +335,7 @@ export default function AdminIuranPage() {
                               ))}
                             </div>
                           ) : (
-                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-gray-100/80 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 text-gray-600 dark:text-gray-400">
+                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-gray-100/80 dark:bg-gray-800/50 border border-gray-300/55 dark:border-gray-700/50 text-gray-600 dark:text-gray-400">
                               Tidak ada iuran
                             </span>
                           )}

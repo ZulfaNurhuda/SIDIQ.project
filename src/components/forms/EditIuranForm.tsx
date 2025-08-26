@@ -112,13 +112,29 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
   };
 
   const handleConfirmUpdate = async () => {
-    if (!iuranData || !pendingData) return;
+    if (!iuranData || !pendingData) {
+      setErrorMessage('Data iuran atau perubahan tidak valid. Silakan coba lagi.');
+      return;
+    }
+    
+    // Validate required data before sending
+    if (!iuranData.id || typeof iuranData.id !== 'string' || iuranData.id.trim() === '' || iuranData.id === 'undefined') {
+      setErrorMessage('ID iuran tidak valid. Data mungkin belum dimuat dengan benar. Silakan tutup modal dan coba lagi.');
+      return;
+    }
+    
+    // Additional UUID format validation
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(iuranData.id.trim())) {
+      setErrorMessage('Format ID iuran tidak valid. Silakan refresh halaman dan coba lagi.');
+      return;
+    }
     
     setErrorMessage('');
     setSuccessMessage('');
     
     updateIuranMutation.mutate({
-      id: iuranData.id,
+      id: iuranData.id.trim(),
       ...pendingData,
     }, {
       onSuccess: () => {
@@ -134,8 +150,6 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
         }, 2000);
       },
       onError: (error: any) => {
-        console.error('Error updating iuran:', error);
-        
         // Enhanced error handling for better debugging
         let displayError = 'Gagal mengupdate iuran';
         
@@ -147,7 +161,6 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
           displayError = error;
         }
         
-        console.log('Setting error message:', displayError); // Debug log
         setErrorMessage(displayError);
       }
     });
@@ -200,7 +213,7 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
     <Modal isOpen={isOpen} onClose={handleClose} title="Edit Data Iuran" size="md">
       {/* Success Message */}
       {successMessage && (
-        <Card className="bg-green-50/80 dark:bg-green-900/20 border-green-200 dark:border-green-800 mb-4">
+        <Card className="bg-green-500/20 dark:bg-green-900/20 border-green-400/60 dark:border-green-800 mb-4">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
               <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
@@ -214,7 +227,7 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
 
       {/* Error Message */}
       {errorMessage && (
-        <Card className="bg-red-50/80 dark:bg-red-900/20 border-red-200 dark:border-red-800 mb-4">
+        <Card className="bg-red-500/20 dark:bg-red-900/20 border-red-400/60 dark:border-red-800 mb-4">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
               <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
@@ -228,7 +241,7 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
 
       {/* Permission Check */}
       {!canEdit && (
-        <Card className="bg-amber-50/80 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 mb-4">
+        <Card className="bg-amber-500/20 dark:bg-amber-900/20 border-amber-400/60 dark:border-amber-800 mb-4">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
               <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
@@ -242,7 +255,7 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Iuran Info */}
-        <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50/50 dark:bg-gray-800/50 rounded-lg">
+        <div className="grid grid-cols-2 gap-4 p-4 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
           <div>
             <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Jamaah</p>
             <p className="text-base font-semibold text-gray-900 dark:text-white">
@@ -300,7 +313,7 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
         </div>
 
         {/* Total Calculation Card */}
-        <Card className="bg-primary-50/50 dark:bg-primary-900/20">
+        <Card className="bg-blue-500/20 dark:bg-blue-900/20">
           <CardContent className="p-4">
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
@@ -324,7 +337,7 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
 
         {/* Inline Confirmation Warning */}
         {showConfirmation && (
-          <Card className="bg-amber-50/80 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 mb-4">
+          <Card className="bg-amber-500/20 dark:bg-amber-900/20 border-amber-400/60 dark:border-amber-800 mb-4">
             <CardContent className="p-4">
               <div className="flex items-start space-x-3">
                 <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />

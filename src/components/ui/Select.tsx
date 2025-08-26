@@ -144,7 +144,7 @@ export function Select({
                   "px-3 py-2 text-sm glass-dropdown-item",
                   selected && "font-semibold",
                   active
-                    ? "bg-primary-500/20 dark:bg-primary-500/20"
+                    ? "bg-blue-500/20 dark:bg-blue-500/20"
                     : undefined
                 )}
               >

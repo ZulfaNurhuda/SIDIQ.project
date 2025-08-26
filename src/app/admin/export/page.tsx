@@ -98,7 +98,7 @@ export default function ExportPage() {
       // Small delay to show loading state
       await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
-      console.error('Export error:', error);
+      // Export error handling
     } finally {
       setIsExporting(false);
     }
@@ -147,7 +147,7 @@ export default function ExportPage() {
             />
           </div>
           
-          <div className="mt-4 p-4 bg-gray-50/50 dark:bg-gray-800/50 rounded-lg">
+          <div className="mt-4 p-4 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
             <div className="flex items-center space-x-4 text-sm">
               <div className="flex items-center space-x-1">
                 <FileText className="h-4 w-4 text-gray-600 dark:text-gray-300" />
@@ -252,7 +252,7 @@ export default function ExportPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <tr className="border-b border-gray-400/80 dark:border-gray-700">
                     <th className="text-left p-2">Nama Jamaah</th>
                     <th className="text-left p-2">Bulan/Tahun</th>
                     <th className="text-right p-2">Total Iuran</th>
@@ -261,7 +261,7 @@ export default function ExportPage() {
                 </thead>
                 <tbody>
                   {filteredData.slice(0, 10).map((item) => (
-                    <tr key={item.id} className="border-b border-gray-100 dark:border-gray-800">
+                    <tr key={item.id} className="border-b border-gray-300/65 dark:border-gray-800">
                       <td className="p-2 font-medium">{item.nama_jamaah}</td>
                       <td className="p-2">
                         {new Date(item.bulan_tahun).toLocaleDateString('id-ID', {

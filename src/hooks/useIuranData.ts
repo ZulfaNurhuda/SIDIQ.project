@@ -85,8 +85,6 @@ export function useSubmitIuran() {
       username: string;
       nama_jamaah: string;
     }) => {
-      console.log('useSubmitIuran received data:', data); // Debug log
-      
       // Validate required fields
       if (!data.user_id) {
         throw new Error('User ID tidak valid');
@@ -113,10 +111,7 @@ export function useSubmitIuran() {
         .select()
         .single();
 
-      console.log('Supabase upsert result:', { result, error }); // Debug log
-
       if (error) {
-        console.error('Supabase upsert error:', error);
         throw error;
       }
 
@@ -170,21 +165,53 @@ export function useUpdateIuran() {
       total_iuran?: number;
     }) => {
       try {
-        console.log('Updating iuran:', { id, updateData });
+        // Validate ID format more strictly
+        if (!id || typeof id !== 'string' || id.trim() === '' || id === 'undefined' || id === 'null') {
+          throw new Error('ID iuran tidak valid atau kosong. Data mungkin belum dimuat dengan benar.');
+        }
+        
+        const cleanId = id.trim();
+        
+        // Check if ID is a valid UUID format
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(cleanId)) {
+          throw new Error(`Format ID iuran tidak valid: "${cleanId}". ID harus berupa UUID yang valid.`);
+        }
         
         // Remove total_iuran from updateData since it's computed in the database
         const { total_iuran, ...dataWithoutTotal } = updateData;
         
+        // Clean data: remove any undefined or null values
+        const cleanData = Object.fromEntries(
+          Object.entries(dataWithoutTotal).filter(([_, v]) => v !== undefined && v !== null)
+        );
+        
+        if (Object.keys(cleanData).length === 0) {
+          throw new Error('Tidak ada data yang valid untuk diupdate');
+        }
+        
         const { data, error } = await supabase
           .from('iuran_submissions')
-          .update(dataWithoutTotal)
-          .eq('id', id)
+          .update(cleanData)
+          .eq('id', cleanId)
           .select()
           .single();
 
         if (error) {
-          console.error('Supabase update error:', error);
-          throw new Error(`Database error: ${error.message || 'Unknown error'}`);
+          // Enhanced error messages for common UUID issues
+          if (error.message.includes('invalid input syntax for type uuid')) {
+            throw new Error(`Database error: Format UUID tidak valid "${cleanId}". Pastikan data telah dimuat dengan benar. Coba refresh halaman.`);
+          } else if (error.code === 'PGRST116') {
+            throw new Error('Data iuran tidak ditemukan. Mungkin sudah dihapus atau tidak ada akses.');
+          } else if (error.message.includes('column') && error.message.includes('does not exist')) {
+            throw new Error(`Database error: Kolom tidak ditemukan. Periksa struktur database.`);
+          }
+          
+          throw new Error(`Database error: ${error.message}. Periksa koneksi database atau refresh halaman.`);
+        }
+
+        if (!data) {
+          throw new Error('Update berhasil tetapi tidak ada data yang dikembalikan');
         }
 
         return data;
@@ -210,22 +237,30 @@ export function useDeleteIuran() {
 
   return useMutation({
     mutationFn: async (iuranId: string) => {
-      console.log('Deleting iuran:', iuranId);
-      
       // Validate iuranId
-      if (!iuranId) {
-        throw new Error('ID iuran tidak valid');
+      if (!iuranId || iuranId.trim() === '') {
+        throw new Error('ID iuran tidak valid atau kosong');
+      }
+      
+      // Check if ID is a valid UUID format
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(iuranId.trim())) {
+        throw new Error('Format ID iuran tidak valid. ID harus berupa UUID yang valid.');
       }
       
       try {
         // Use RPC function for delete if available, otherwise direct delete
         const { data, error } = await supabase.rpc('delete_iuran_submission', { 
-          p_submission_id: iuranId 
+          p_submission_id: iuranId.trim() 
         });
 
         if (error) {
-          console.error('Supabase RPC error (delete_iuran_submission):', error);
-          throw new Error(`Database error: ${error.message || 'Unknown error'}`);
+          // Enhanced error messages for common UUID issues
+          if (error.message.includes('invalid input syntax for type uuid')) {
+            throw new Error(`Database error: invalid input syntax for type uuid: "${iuranId}". Check database setup.`);
+          }
+          
+          throw new Error(`Database error: ${error.message}. Check database setup.`);
         }
 
         if (!data) {

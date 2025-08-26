@@ -49,7 +49,6 @@ export default function UsersPage() {
       await deleteUserMutation.mutateAsync(deleteConfirmation.userId);
       setDeleteConfirmation({ isOpen: false, userId: '', userName: '' });
     } catch (error: any) {
-      console.error('Error deleting user:', error);
       setErrorMessage(
         error?.message || 'Gagal menghapus user. Silakan coba lagi.'
       );
@@ -212,7 +211,7 @@ export default function UsersPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <tr className="border-b border-gray-400/80 dark:border-gray-700">
                     <th className="text-left p-4">Username</th>
                     <th className="text-left p-4">Nama Lengkap</th>
                     <th className="text-left p-4">Role</th>
@@ -222,7 +221,7 @@ export default function UsersPage() {
                 </thead>
                 <tbody>
                   {filteredUsers.map((user) => (
-                    <tr key={user.id} className="border-b border-gray-100 dark:border-gray-800">
+                    <tr key={user.id} className="border-b border-gray-300/65 dark:border-gray-800">
                       <td className="p-4">
                         <span className="font-medium text-gray-900 dark:text-white">
                           {user.username}
@@ -333,7 +332,7 @@ export default function UsersPage() {
       {/* Error Message */}
       {errorMessage && (
         <div className="fixed bottom-4 right-4 z-50">
-          <Card className="bg-red-50/80 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+          <Card className="bg-red-500/20 dark:bg-red-900/20 border-red-400/60 dark:border-red-800">
             <CardContent className="p-4">
               <div className="flex items-start space-x-3">
                 <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />

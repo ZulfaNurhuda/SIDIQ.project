@@ -130,8 +130,6 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
         }, 2000);
       },
       onError: (error: any) => {
-        console.error('Error updating user:', error);
-        
         // Enhanced error handling for better debugging
         let displayError = 'Gagal mengupdate user';
         
@@ -143,7 +141,6 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
           displayError = error;
         }
         
-        console.log('Setting error message:', displayError); // Debug log
         setErrorMessage(displayError);
       }
     });
@@ -169,7 +166,7 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
     <Modal isOpen={isOpen} onClose={handleClose} title="Edit User" size="md">
       {/* Success Message */}
       {successMessage && (
-        <Card className="bg-green-50/80 dark:bg-green-900/20 border-green-200 dark:border-green-800 mb-4">
+        <Card className="bg-green-500/20 dark:bg-green-900/20 border-green-400/60 dark:border-green-800 mb-4">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
               <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
@@ -183,7 +180,7 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
 
       {/* Error Message */}
       {errorMessage && (
-        <Card className="bg-red-50/80 dark:bg-red-900/20 border-red-200 dark:border-red-800 mb-4">
+        <Card className="bg-red-500/20 dark:bg-red-900/20 border-red-400/60 dark:border-red-800 mb-4">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
               <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
@@ -323,7 +320,7 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
 
         {/* Inline Confirmation Warning */}
         {showConfirmation && (
-          <Card className="bg-amber-50/80 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 mb-4">
+          <Card className="bg-amber-500/20 dark:bg-amber-900/20 border-amber-400/60 dark:border-amber-800 mb-4">
             <CardContent className="p-4">
               <div className="flex items-start space-x-3">
                 <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />

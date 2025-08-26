@@ -14,11 +14,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     
     const variants = {
       default: 'glass-button',
-      secondary: 'bg-gray-500/20 hover:bg-gray-500/30 backdrop-blur-sm border border-gray-300/50 text-gray-900 dark:text-gray-100',
-      outline: 'bg-transparent hover:bg-primary-500/10 border border-primary-500/50 text-primary-900 dark:text-primary-100',
+      secondary: 'bg-gray-500/20 hover:bg-gray-500/30 backdrop-blur-sm border border-gray-400/60 dark:border-gray-300/50 text-gray-900 dark:text-gray-100',
+      outline: 'bg-transparent hover:bg-primary-500/10 border border-primary-600/70 dark:border-primary-500/50 text-primary-900 dark:text-primary-100',
       ghost: 'bg-transparent hover:bg-primary-500/10 text-primary-900 dark:text-primary-100',
-      destructive: 'bg-red-500/20 hover:bg-red-500/30 backdrop-blur-sm border border-red-300/50 text-red-900 dark:text-red-100',
-      warning: 'bg-amber-500/20 hover:bg-amber-500/30 backdrop-blur-sm border border-amber-300/50 text-amber-900 dark:text-amber-100',
+      destructive: 'bg-red-500/20 hover:bg-red-500/30 backdrop-blur-sm border border-red-400/60 dark:border-red-300/50 text-red-900 dark:text-red-100',
+      warning: 'bg-amber-500/20 hover:bg-amber-500/30 backdrop-blur-sm border border-amber-400/60 dark:border-amber-300/50 text-amber-900 dark:text-amber-100',
     };
 
     const sizes = {

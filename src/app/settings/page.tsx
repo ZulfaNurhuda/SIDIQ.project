@@ -110,8 +110,6 @@ export default function SettingsPage() {
         setIsUpdatingProfile(false);
       },
       onError: (error: any) => {
-        console.error('Error updating profile:', error);
-        
         let displayError = 'Gagal mengupdate profile';
         if (error?.message) {
           displayError = error.message;
@@ -164,7 +162,6 @@ export default function SettingsPage() {
       passwordForm.reset();
 
     } catch (error: any) {
-      console.error('Error updating password:', error);
       
       let displayError = 'Gagal mengubah password';
       if (error?.message) {
@@ -234,7 +231,6 @@ export default function SettingsPage() {
       setShowBackupModal(false);
       
     } catch (error: any) {
-      console.error('Backup error:', error);
       setErrorMessage(`Gagal backup database: ${error.message}`);
     } finally {
       setIsBackingUp(false);
@@ -290,7 +286,6 @@ export default function SettingsPage() {
             });
           
           if (error) {
-            console.warn(`Error restoring user ${userData.username}:`, error);
           }
         }
       }
@@ -316,7 +311,6 @@ export default function SettingsPage() {
           });
         
         if (error) {
-          console.warn(`Error restoring iuran for ${iuranData.username}:`, error);
         }
       }
       
@@ -330,7 +324,6 @@ export default function SettingsPage() {
       }, 2000);
       
     } catch (error: any) {
-      console.error('Restore error:', error);
       setErrorMessage(`Gagal restore database: ${error.message}`);
     } finally {
       setIsRestoring(false);
@@ -364,7 +357,6 @@ export default function SettingsPage() {
       }, 2000);
       
     } catch (error: any) {
-      console.error('Reset error:', error);
       setErrorMessage(`Gagal reset database: ${error.message}`);
     } finally {
       setIsResetting(false);
@@ -411,7 +403,7 @@ export default function SettingsPage() {
 
       {/* Success/Error Messages */}
       {successMessage && (
-        <Card className="bg-green-50/80 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+        <Card className="bg-green-500/20 dark:bg-green-900/20 border-green-400/60 dark:border-green-800">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
               <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
@@ -424,7 +416,7 @@ export default function SettingsPage() {
       )}
 
       {errorMessage && (
-        <Card className="bg-red-50/80 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+        <Card className="bg-red-500/20 dark:bg-red-900/20 border-red-400/60 dark:border-red-800">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
               <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
@@ -628,9 +620,9 @@ export default function SettingsPage() {
                   <ThemeToggle />
                 </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                <div className="border-t border-gray-300/70 dark:border-gray-700 pt-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="border-2 border-dashed border-gray-300 dark:border-gray-600">
+                    <Card className="border-2 border-dashed border-gray-300/70 dark:border-gray-600">
                       <CardContent className="p-4 text-center">
                         <Palette className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-gray-600 dark:text-gray-300">Warna Aksen</p>
@@ -638,7 +630,7 @@ export default function SettingsPage() {
                       </CardContent>
                     </Card>
 
-                    <Card className="border-2 border-dashed border-gray-300 dark:border-gray-600">
+                    <Card className="border-2 border-dashed border-gray-300/70 dark:border-gray-600">
                       <CardContent className="p-4 text-center">
                         <Bell className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-gray-600 dark:text-gray-300">Notifikasi</p>
@@ -646,7 +638,7 @@ export default function SettingsPage() {
                       </CardContent>
                     </Card>
 
-                    <Card className="border-2 border-dashed border-gray-300 dark:border-gray-600">
+                    <Card className="border-2 border-dashed border-gray-300/70 dark:border-gray-600">
                       <CardContent className="p-4 text-center">
                         <Settings className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-gray-600 dark:text-gray-300">Layout</p>
@@ -699,9 +691,9 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <div className="border-t border-gray-300/70 dark:border-gray-700 pt-6">
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Danger Zone</h3>
-                      <Card className="border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10">
+                      <Card className="border-red-400/60 dark:border-red-800 bg-red-500/20 dark:bg-red-900/20">
                         <CardContent className="p-4">
                           <div className="flex items-start space-x-3">
                             <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
@@ -730,7 +722,7 @@ export default function SettingsPage() {
                 )}
 
                 {user?.role !== 'superadmin' && (
-                  <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10">
+                  <Card className="border-amber-400/60 dark:border-amber-800 bg-amber-500/20 dark:bg-amber-900/20">
                     <CardContent className="p-4">
                       <div className="flex items-start space-x-3">
                         <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />

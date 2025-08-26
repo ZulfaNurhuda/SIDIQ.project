@@ -41,8 +41,6 @@ export function useCreateUser() {
         });
 
         if (error) {
-          console.error('Supabase RPC error (add_new_user):', error);
-          
           // Handle specific error types
           if (error.message?.includes('Username sudah digunakan oleh user aktif')) {
             throw new Error('Username sudah digunakan oleh user aktif, silakan pilih username lain');
@@ -76,10 +74,6 @@ export function useCreateUser() {
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       queryClient.invalidateQueries({ queryKey: ['iuran'] });
       
-      // Show notification if user was reactivated
-      if (result?.is_reactivated) {
-        console.log('User dengan username ini telah direaktifkan dan data iuran sebelumnya telah tersambung kembali.');
-      }
     },
   });
 }
@@ -100,12 +94,8 @@ export function useUpdateUser() {
       password?: string;
     }) => {
       try {
-        console.log('Updating user:', { id, userData, hasPassword: !!password }); // Debug log
-        
         // If password is provided, use a WORKING approach
         if (password) {
-          console.log('Password update requested for user:', id);
-          
           // Get current user data
           const { data: currentUser, error: fetchError } = await supabase
             .from('users')
@@ -121,8 +111,6 @@ export function useUpdateUser() {
             throw new Error('User tidak ditemukan');
           }
           
-          console.log('Current user found:', currentUser.username);
-          
           // DIFFERENT APPROACH: Use direct database update with manual password hashing
           // Since RPC functions are giving UUID issues, let's hash the password ourselves
           
@@ -135,17 +123,13 @@ export function useUpdateUser() {
               p_role: userData.role || currentUser.role,
             });
             
-            console.log('add_new_user result:', { data, error });
-            
             // If error is about username already used by active user, that means it worked
             if (error && error.message && error.message.includes('Username sudah digunakan oleh user aktif')) {
-              console.log('Password updated successfully (expected duplicate username error)');
               return { success: true, message: 'Password updated successfully' };
             }
             
             // If no error, it also worked
             if (!error && data) {
-              console.log('Password updated successfully via add_new_user');
               return data[0];
             }
             
@@ -156,7 +140,6 @@ export function useUpdateUser() {
             
             return data[0];
           } catch (err: any) {
-            console.error('add_new_user approach failed:', err);
             throw new Error(`Gagal mengupdate password: ${err.message || 'Unknown error'}`);
           }
         } else {
@@ -169,8 +152,6 @@ export function useUpdateUser() {
             .single();
 
           if (error) {
-            console.error('Supabase update error:', error);
-            
             if (error.message?.includes('duplicate key value violates unique constraint')) {
               throw new Error('Username sudah digunakan oleh user lain');
             }
@@ -199,8 +180,6 @@ export function useDeleteUser() {
 
   return useMutation({
     mutationFn: async (userId: string) => {
-      console.log('Attempting to delete user:', userId); // Debug log
-      
       // Validate userId
       if (!userId) {
         throw new Error('User ID tidak valid');
@@ -211,11 +190,7 @@ export function useDeleteUser() {
         const { data, error } = await supabase
           .rpc('soft_delete_user', { p_user_id: userId });
 
-        console.log('Soft delete result:', { data, error }); // Debug log
-
         if (error) {
-          console.error('Supabase RPC error (soft_delete_user):', error);
-          
           // Handle specific error types
           if (error.message?.includes('Could not find the function')) {
             throw new Error('Fungsi soft_delete_user tidak ditemukan. Pastikan database sudah di-setup dengan benar.');

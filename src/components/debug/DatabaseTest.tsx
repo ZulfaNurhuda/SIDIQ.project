@@ -75,14 +75,10 @@ export function DatabaseTest() {
         iuran_5: 0
       };
 
-      console.log('Test data being inserted:', testData);
-
       const { data, error } = await supabase
         .from('iuran_submissions')
         .insert([testData])
         .select();
-
-      console.log('Insert result:', { data, error });
 
       setTestResult({
         type: 'insert-test',
@@ -94,7 +90,6 @@ export function DatabaseTest() {
         error: error
       });
     } catch (error) {
-      console.log('Caught error:', error);
       setTestResult({
         type: 'error',
         message: 'Iuran insert test failed',

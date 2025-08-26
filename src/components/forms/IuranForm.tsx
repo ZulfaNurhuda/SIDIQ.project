@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubmitIuran, useUserSubmissionForMonth } from '@/hooks/useIuranData';
 import { getCurrentMonthYear, getCurrentMonthYearString, formatCurrency, formatNumber, parseCurrency } from '@/lib/utils';
@@ -125,10 +126,6 @@ export function IuranForm() {
           return;
         }
       } catch (error) {
-        // If error code is PGRST116 (no rows found), that's expected for new submissions
-        if (error?.code !== 'PGRST116') {
-          console.error('Error checking existing submission:', error);
-        }
       }
     }
 
@@ -163,8 +160,6 @@ export function IuranForm() {
         nama_jamaah: user.full_name,
       };
       
-      console.log('Submit data:', submitData); // Debug log
-      
       await submitMutation.mutateAsync(submitData);
 
       setIsEditMode(false);
@@ -174,8 +169,8 @@ export function IuranForm() {
       setShowSuccessModal(true);
       // Reset form will happen automatically via refetch
     } catch (error) {
-      console.error('Error submitting iuran:', error);
-      console.error('Error details:', {
+      // Error details for debugging
+      const errorDetails = {
         message: error?.message,
         code: error?.code,
         details: error?.details,
@@ -322,7 +317,7 @@ export function IuranForm() {
           </div>
 
           {/* Total Card */}
-          <Card className="bg-primary-50/50 dark:bg-primary-900/20">
+          <Card className="bg-blue-500/20 dark:bg-blue-900/20">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -340,7 +335,7 @@ export function IuranForm() {
 
           {/* High Amount Warning */}
           {isHighAmount && (
-            <Card className={`${isVeryHighAmount ? 'bg-red-50/80 dark:bg-red-900/30 border-red-200 dark:border-red-800' : 'bg-amber-50/80 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800'}`}>
+            <Card className={`${isVeryHighAmount ? 'bg-red-500/20 dark:bg-red-900/30 border-red-400/60 dark:border-red-800' : 'bg-amber-500/20 dark:bg-amber-900/30 border-amber-400/60 dark:border-amber-800'}`}>
               <CardContent className="p-4">
                 <div className="flex items-start space-x-3">
                   <AlertTriangle className={`h-5 w-5 mt-0.5 flex-shrink-0 ${isVeryHighAmount ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'}`} />
@@ -362,7 +357,7 @@ export function IuranForm() {
 
           {/* General Error Message */}
           {inputErrors.general && (
-            <Card className="bg-red-50/80 dark:bg-red-900/30 border-red-200 dark:border-red-800">
+            <Card className="bg-red-500/20 dark:bg-red-900/30 border-red-400/60 dark:border-red-800">
               <CardContent className="p-4">
                 <div className="flex items-start space-x-3">
                   <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
@@ -443,7 +438,7 @@ export function IuranForm() {
           </div>
 
           {hasSubmitted && (
-            <Card className="bg-green-50/80 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+            <Card className="bg-green-500/20 dark:bg-green-900/20 border-green-400/60 dark:border-green-800">
               <CardContent className="p-4">
                 <div className="flex items-start space-x-3">
                   <Check className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
@@ -469,39 +464,28 @@ export function IuranForm() {
       </CardContent>
       
       {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 animate-in fade-in zoom-in duration-200">
-            <div className="text-center space-y-4">
-              <div className="flex justify-center">
-                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                  <Check className="w-8 h-8 text-green-600 dark:text-green-400" />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  Iuran Berhasil Dikirim!
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Terima kasih atas kontribusi Anda untuk bulan {new Date(currentMonth).toLocaleDateString('id-ID', {
-                    month: 'long',
-                    year: 'numeric'
-                  })}.
-                </p>
-                <p className="text-sm text-green-600 dark:text-green-400 font-medium mt-2">
-                  Total: {formatCurrency(total)}
-                </p>
-              </div>
-              <Button
-                onClick={() => setShowSuccessModal(false)}
-                className="w-full"
-              >
-                Tutup
-              </Button>
-            </div>
+      <ConfirmationModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        onConfirm={() => setShowSuccessModal(false)}
+        title="Iuran Berhasil Dikirim!"
+        message={
+          <div className="space-y-2">
+            <p>
+              Terima kasih atas kontribusi Anda untuk bulan {new Date(currentMonth).toLocaleDateString('id-ID', {
+                month: 'long',
+                year: 'numeric'
+              })}.
+            </p>
+            <p className="text-sm font-medium text-green-600 dark:text-green-400">
+              Total: {formatCurrency(total)}
+            </p>
           </div>
-        </div>
-      )}
+        }
+        confirmText="Tutup"
+        cancelText=""
+        variant="success"
+      />
     </Card>
   );
 }
