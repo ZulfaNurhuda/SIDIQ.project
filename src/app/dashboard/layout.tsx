@@ -11,7 +11,7 @@ import { Header } from '@/components/layout/Header';
 import HeaderBackdrop from '@/components/layout/HeaderBackdrop';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { useRequireAuth } from '@/hooks/useAuth';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { FullPageLoading } from '@/components/ui/FullPageLoading';
 
 /**
  * @function DashboardLayout
@@ -29,12 +29,14 @@ export default function DashboardLayout({
     /* Gunakan hook kustom untuk memeriksa apakah pengguna terotentikasi. */
     const { isAuthenticated, isLoading } = useRequireAuth();
 
-    /* Tampilkan ikon loading saat pemeriksaan otentikasi sedang berlangsung. */
+    /* Tampilkan loading halaman penuh saat pemeriksaan otentikasi sedang berlangsung. */
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-                <LoadingSpinner size="lg" />
-            </div>
+            <FullPageLoading 
+                title="Dashboard"
+                message="Memverifikasi akses"
+                tip="🔐 Memastikan Anda memiliki akses ke dashboard"
+            />
         );
     }
 

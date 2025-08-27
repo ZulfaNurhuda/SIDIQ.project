@@ -13,7 +13,7 @@ import { useIuranData } from '@/hooks/useIuranData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { InlineLoading } from '@/components/ui/InlineLoading';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { exportToXLSX, exportToCSV, exportToJSON, exportToXML } from '@/lib/exportUtils';
 import { Download, FileText, Filter, Calendar } from 'lucide-react';
@@ -50,7 +50,21 @@ export default function ExportPage() {
     const filters = watch();
 
     if (isLoading) {
-        return <div className="flex items-center justify-center h-64"><LoadingSpinner size="lg" /></div>;
+        return (
+            <div className="space-y-6">
+                <PageTitle
+                    title="Ekspor Data"
+                    description="Filter dan ekspor data iuran ke berbagai format"
+                    icon={Download}
+                />
+                <div className="flex items-center justify-center h-64">
+                    <InlineLoading 
+                        message="Memuat data untuk ekspor"
+                        size="lg"
+                    />
+                </div>
+            </div>
+        );
     }
 
     /**

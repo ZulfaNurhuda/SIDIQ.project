@@ -11,7 +11,7 @@ import { Header } from '@/components/layout/Header';
 import HeaderBackdrop from '@/components/layout/HeaderBackdrop';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { useRequireRole } from '@/hooks/useAuth';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { FullPageLoading } from '@/components/ui/FullPageLoading';
 
 /**
  * @function AdminLayout
@@ -29,12 +29,14 @@ export default function AdminLayout({
     /* Gunakan hook kustom untuk memeriksa apakah pengguna memiliki salah satu peran yang diizinkan. */
     const { hasAccess, isLoading } = useRequireRole(['superadmin', 'admin']);
 
-    /* Tampilkan ikon loading saat pemeriksaan peran sedang berlangsung. */
+    /* Tampilkan loading halaman penuh saat pemeriksaan peran sedang berlangsung. */
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-                <LoadingSpinner size="lg" />
-            </div>
+            <FullPageLoading 
+                title="Panel Admin"
+                message="Memverifikasi hak akses"
+                tip="🚨 Memastikan Anda memiliki akses administrator"
+            />
         );
     }
 

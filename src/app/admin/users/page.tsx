@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { InlineLoading } from '@/components/ui/InlineLoading';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { UserForm } from '@/components/forms/UserForm';
 import { EditUserForm } from '@/components/forms/EditUserForm';
@@ -48,8 +48,18 @@ export default function UsersPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <LoadingSpinner size="lg" />
+            <div className="space-y-6">
+                <PageTitle
+                    title="Kelola Pengguna"
+                    description="Tambah, edit, dan kelola akun pengguna sistem"
+                    icon={Users}
+                />
+                <div className="flex items-center justify-center h-64">
+                    <InlineLoading 
+                        message="Memuat daftar pengguna"
+                        size="lg"
+                    />
+                </div>
             </div>
         );
     }

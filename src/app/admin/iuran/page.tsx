@@ -13,7 +13,7 @@
 import { useState } from 'react';
 import { useRequireRole, useAuth } from '@/hooks/useAuth';
 import { useIuranData, useDeleteIuran } from '@/hooks/useIuranData';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { InlineLoading } from '@/components/ui/InlineLoading';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -73,20 +73,26 @@ export default function AdminIuranPage() {
   /* Inisialisasi hook mutasi untuk menghapus data iuran. */
   const deleteIuranMutation = useDeleteIuran();
 
-  /* Tampilkan loading jika verifikasi role sedang berjalan atau akses ditolak. */
+  /* Layout sudah menangani role loading dan access control */
   if (roleLoading || !hasAccess) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return null;
   }
 
   /* Tampilkan loading jika data iuran masih diambil. */
   if (dataLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size="lg" />
+      <div className="space-y-6">
+        <PageTitle
+          title="Manajemen Iuran"
+          description="Kelola dan pantau data iuran jamaah"
+          icon={FileText}
+        />
+        <div className="flex items-center justify-center h-64">
+          <InlineLoading 
+            message="Memuat data iuran"
+            size="lg"
+          />
+        </div>
       </div>
     );
   }

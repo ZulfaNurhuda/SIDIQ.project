@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useIuranData } from '@/hooks/useIuranData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { InlineLoading } from '@/components/ui/InlineLoading';
 import { PageTitle } from '@/components/ui/PageTitle';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Calendar, DollarSign, History } from 'lucide-react';
@@ -29,8 +29,20 @@ export default function JamaahHistoryPage() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <LoadingSpinner size="lg" />
+            <div className="space-y-6">
+                <div className="text-center">
+                    <PageTitle
+                        title="Riwayat Iuran"
+                        description="Riwayat pembayaran iuran bulanan Anda"
+                        icon={History}
+                    />
+                </div>
+                <div className="flex items-center justify-center h-64">
+                    <InlineLoading 
+                        message="Memuat riwayat iuran"
+                        size="lg"
+                    />
+                </div>
             </div>
         );
     }

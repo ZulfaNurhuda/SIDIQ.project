@@ -9,7 +9,7 @@
 
 import { useRequireRole } from '@/hooks/useAuth';
 import { useDashboardStats, useIuranData } from '@/hooks/useIuranData';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { InlineLoading } from '@/components/ui/InlineLoading';
 import { StatsCard } from '@/components/features/dashboard/StatsCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { PageTitle } from '@/components/ui/PageTitle';
@@ -32,23 +32,29 @@ export default function DashboardPage() {
     /* Ambil semua data iuran untuk menampilkan data terbaru. */
     const { data: iuranData, isLoading: iuranLoading } = useIuranData();
 
-    /* Tampilkan ikon loading jika pemeriksaan peran sedang berlangsung atau akses ditolak. */
+    /* Layout sudah menangani loading dan access control, jadi tidak perlu loading di sini */
     if (roleLoading || !hasAccess) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <LoadingSpinner size="lg" />
-            </div>
-        );
+        return null;
     }
 
     /* Tentukan status loading keseluruhan. */
     const isLoading = statsLoading || iuranLoading;
 
-    /* Tampilkan ikon loading jika data masih diambil. */
+    /* Tampilkan loading inline jika data masih diambil. */
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <LoadingSpinner size="lg" />
+            <div className="space-y-6">
+                <PageTitle
+                    title="Dasbor Admin"
+                    description="Overview sistem informasi infaq bulanan"
+                    icon={LayoutDashboard}
+                />
+                <div className="flex items-center justify-center h-64">
+                    <InlineLoading 
+                        message="Memuat data dashboard"
+                        size="lg"
+                    />
+                </div>
             </div>
         );
     }

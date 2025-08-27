@@ -18,6 +18,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
 import { DatabaseTest } from '@/components/debug/DatabaseTest';
 import { EnvCheck } from '@/components/debug/EnvCheck';
+import { FullPageLoading } from '@/components/ui/FullPageLoading';
 
 /* Skema Zod untuk memvalidasi data form login. */
 const loginSchema = z.object({
@@ -71,10 +72,20 @@ export function LoginForm() {
         } else {
             /* Jika gagal, tampilkan pesan error. */
             setError(result.error || 'Login gagal');
+            setIsLoading(false);
         }
-
-        setIsLoading(false);
     };
+
+    /* Tampilkan loading halaman penuh saat proses login berlangsung */
+    if (isLoading) {
+        return (
+            <FullPageLoading 
+                title="Masuk ke SIDIQ"
+                message="Memverifikasi kredensial"
+                tip="🔑 Sedang memproses login Anda..."
+            />
+        );
+    }
 
     return (
         <>

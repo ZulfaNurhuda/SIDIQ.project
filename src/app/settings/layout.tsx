@@ -11,7 +11,7 @@ import { Header } from '@/components/layout/Header';
 import HeaderBackdrop from '@/components/layout/HeaderBackdrop';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { useAuth } from '@/hooks/useAuth';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { FullPageLoading } from '@/components/ui/FullPageLoading';
 
 /**
  * @function SettingsLayout
@@ -28,12 +28,14 @@ export default function SettingsLayout({
 }) {
     const { user, isLoading } = useAuth();
 
-    /* Tampilkan ikon loading saat pemeriksaan otentikasi sedang berlangsung. */
+    /* Tampilkan loading halaman penuh saat pemeriksaan otentikasi sedang berlangsung. */
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-                <LoadingSpinner size="lg" />
-            </div>
+            <FullPageLoading 
+                title="Pengaturan"
+                message="Memuat pengaturan"
+                tip="⚙️ Kustomisasi pengalaman Anda di sini"
+            />
         );
     }
 

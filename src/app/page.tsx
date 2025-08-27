@@ -10,7 +10,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { FullPageLoading } from '@/components/ui/FullPageLoading';
 
 /**
  * @function Home
@@ -43,10 +43,12 @@ export default function Home() {
         }
     }, [isAuthenticated, isLoading, user, router]);
 
-    /* Tampilkan ikon loading saat logika pengalihan sedang diproses. */
+    /* Tampilkan loading halaman penuh saat logika pengalihan sedang diproses. */
     return (
-        <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-            <LoadingSpinner size="lg" />
-        </div>
+        <FullPageLoading 
+            title="SIDIQ"
+            message="Mengarahkan Anda"
+            tip="🚀 Menentukan halaman tujuan berdasarkan peran Anda"
+        />
     );
 }
