@@ -93,6 +93,43 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {/* Section divider between admin menu and personal menu */}
+        {['admin', 'superadmin'].includes(user.role) && (
+          <div className="my-4 border-t border-gray-300/60 dark:border-white/15" />
+        )}
+
+        {/* Personal contribution links rendered as normal menu items */}
+        {['admin', 'superadmin'].includes(user.role) && (
+          <>
+            <Link
+              href="/jamaah/form"
+              className={cn(
+                'flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                pathname === '/jamaah/form'
+                  ? 'bg-primary-500/20 text-primary-900 dark:text-primary-100 border border-primary-400/60 dark:border-primary-300/50'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-gray-500/10 hover:text-gray-900 dark:hover:text-white'
+              )}
+              title="Form iuran pribadi"
+            >
+              <PlusCircle className="h-5 w-5" />
+              <span>Form Iuran</span>
+            </Link>
+            <Link
+              href="/jamaah/history"
+              className={cn(
+                'flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                pathname === '/jamaah/history'
+                  ? 'bg-primary-500/20 text-primary-900 dark:text-primary-100 border border-primary-400/60 dark:border-primary-300/50'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-gray-500/10 hover:text-gray-900 dark:hover:text-white'
+              )}
+              title="Riwayat iuran pribadi"
+            >
+              <History className="h-5 w-5" />
+              <span>Riwayat Iuran</span>
+            </Link>
+          </>
+        )}
       </nav>
       
       {/* Footer Section */}

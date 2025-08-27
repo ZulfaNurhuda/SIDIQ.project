@@ -10,7 +10,8 @@ export default function JamaahLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { hasAccess, isLoading } = useRequireRole(['jamaah']);
+  // Allow jamaah, admin, and superadmin to access jamaah pages
+  const { hasAccess, isLoading } = useRequireRole(['jamaah', 'admin', 'superadmin']);
 
   if (isLoading) {
     return (
