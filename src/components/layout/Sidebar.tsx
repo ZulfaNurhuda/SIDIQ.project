@@ -13,7 +13,6 @@ import {
   History,
   Settings,
   PlusCircle,
-  Heart,
 } from 'lucide-react';
 
 const navigationItems = [

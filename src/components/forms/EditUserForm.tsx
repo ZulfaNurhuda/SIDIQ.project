@@ -14,6 +14,14 @@ import { UserPen, Eye, EyeOff, AlertCircle, CheckCircle, Shield } from 'lucide-r
 import { User } from '@/types';
 import { Select } from '@/components/ui/Select';
 
+function getErrorMessage(err: unknown): string | undefined {
+  if (err && typeof err === 'object' && 'message' in err) {
+    const msg = (err as { message?: unknown }).message;
+    return typeof msg === 'string' ? msg : undefined;
+  }
+  return undefined;
+}
+
 const editUserSchema = z.object({
   full_name: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
   role: z.enum(['admin', 'jamaah', 'superadmin'], {
@@ -94,7 +102,7 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
     setErrorMessage('');
     setSuccessMessage('');
     
-    const updateData: any = {
+    const updateData: { id: string; full_name: string; role: 'admin' | 'jamaah' | 'superadmin'; password?: string } = {
       id: user.id,
       // Username is not included since it's readonly
       full_name: pendingData.full_name,
@@ -128,14 +136,13 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
           onClose();
         }, 2000);
       },
-      onError: (error: any) => {
+      onError: (error: unknown) => {
         // Enhanced error handling for better debugging
         let displayError = 'Gagal mengupdate user';
         
-        if (error?.message) {
-          displayError = error.message;
-        } else if (error?.error?.message) {
-          displayError = error.error.message;
+        const msg = getErrorMessage(error);
+        if (msg) {
+          displayError = msg;
         } else if (typeof error === 'string') {
           displayError = error;
         }
@@ -328,7 +335,7 @@ export function EditUserForm({ isOpen, onClose, user }: EditUserFormProps) {
                     Konfirmasi Update User
                   </p>
                   <p className="text-sm text-amber-700 dark:text-amber-300">
-                    Anda akan mengupdate data user <strong>"{user.username}"</strong>. Klik "Konfirmasi" untuk melanjutkan atau "Batal" untuk membatalkan.
+                    Anda akan mengupdate data user <strong>&quot;{user.username}&quot;</strong>. Klik &quot;Konfirmasi&quot; untuk melanjutkan atau &quot;Batal&quot; untuk membatalkan.
                   </p>
                 </div>
               </div>

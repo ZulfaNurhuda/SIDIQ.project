@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Select } from '@/components/ui/Select';
+import type { IuranSubmission } from '@/types';
 
 export default function AdminIuranPage() {
   const { hasAccess, isLoading: roleLoading } = useRequireRole(['superadmin', 'admin']);
@@ -32,7 +33,7 @@ export default function AdminIuranPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'name'>('date');
-  const [editingIuran, setEditingIuran] = useState<any>(null);
+  const [editingIuran, setEditingIuran] = useState<IuranSubmission | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
     isOpen: boolean;
     iuranId: string;
@@ -78,8 +79,9 @@ export default function AdminIuranPage() {
       
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Gagal menghapus data iuran');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Gagal menghapus data iuran';
+      setErrorMessage(message);
       setDeleteConfirmation({ isOpen: false, iuranId: '', jamaahName: '', bulanTahun: '' });
     }
   };

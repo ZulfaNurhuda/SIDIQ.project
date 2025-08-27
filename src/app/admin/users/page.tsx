@@ -49,10 +49,9 @@ export default function UsersPage() {
     try {
       await deleteUserMutation.mutateAsync(deleteConfirmation.userId);
       setDeleteConfirmation({ isOpen: false, userId: '', userName: '' });
-    } catch (error: any) {
-      setErrorMessage(
-        error?.message || 'Gagal menghapus user. Silakan coba lagi.'
-      );
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Gagal menghapus user. Silakan coba lagi.';
+      setErrorMessage(message);
       // Don't close the modal so user can see the error
     }
   };
@@ -80,17 +79,17 @@ export default function UsersPage() {
     }
   };
 
-  const canDeleteUser = (user: any) => {
+  const canDeleteUser = (user: User) => {
     // SUPERADMIN tidak bisa dihapus oleh siapapun
     if (user.role === 'superadmin') return false;
     // User tidak bisa menghapus diri sendiri
     if (user.id === currentUser?.id) return false;
-    // ADMIN tidak bisa menghapus ADMIN lain atau SUPERADMIN
-    if (currentUser?.role === 'admin' && (user.role === 'admin' || user.role === 'superadmin')) return false;
+    // ADMIN tidak bisa menghapus ADMIN lain
+    if (currentUser?.role === 'admin' && user.role === 'admin') return false;
     return true;
   };
 
-  const canEditUser = (user: any) => {
+  const canEditUser = (user: User) => {
     // SUPERADMIN bisa edit semua kecuali tidak bisa edit diri sendiri untuk role
     if (currentUser?.role === 'superadmin') return true;
     // ADMIN hanya bisa edit JAMAAH, tidak bisa edit SUPERADMIN atau ADMIN lain
@@ -106,7 +105,7 @@ export default function UsersPage() {
     setErrorMessage(''); // Clear any previous errors
   };
 
-  const filteredUsers = users?.filter(user => {
+  const filteredUsers = users?.filter(() => {
     // SUPERADMIN bisa lihat semua
     if (currentUser?.role === 'superadmin') return true;
     // ADMIN bisa lihat semua user tapi tidak bisa edit/hapus SUPERADMIN dan ADMIN lain

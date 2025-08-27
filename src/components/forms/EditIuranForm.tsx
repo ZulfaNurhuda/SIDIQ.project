@@ -4,13 +4,20 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Edit, AlertCircle, CheckCircle, Calculator, Shield } from 'lucide-react';
 import { formatCurrency, formatNumber, parseCurrency } from '@/lib/utils';
 import { useUpdateIuran } from '@/hooks/useIuranData';
+
+function getErrorMessage(err: unknown): string | undefined {
+  if (err && typeof err === 'object' && 'message' in err) {
+    const msg = (err as { message?: unknown }).message;
+    return typeof msg === 'string' ? msg : undefined;
+  }
+  return undefined;
+}
 
 const editIuranSchema = z.object({
   iuran_1: z.number().min(0, 'Iuran 1 tidak boleh negatif'),
@@ -26,7 +33,7 @@ type EditIuranFormData = z.infer<typeof editIuranSchema>;
 interface IuranData {
   id: string;
   nama_jamaah: string;
-  username: string;
+  username?: string;
   user_id: string;
   iuran_1: number;
   iuran_2: number;
@@ -55,7 +62,6 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
   const updateIuranMutation = useUpdateIuran();
 
   const {
-    register,
     handleSubmit,
     formState: { errors },
     reset,
@@ -149,14 +155,13 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
           onClose();
         }, 2000);
       },
-      onError: (error: any) => {
+      onError: (error: unknown) => {
         // Enhanced error handling for better debugging
         let displayError = 'Gagal mengupdate iuran';
         
-        if (error?.message) {
-          displayError = error.message;
-        } else if (error?.error?.message) {
-          displayError = error.error.message;
+        const msg = getErrorMessage(error);
+        if (msg) {
+          displayError = msg;
         } else if (typeof error === 'string') {
           displayError = error;
         }
@@ -346,7 +351,7 @@ export function EditIuranForm({ isOpen, onClose, iuranData, currentUserId, curre
                     Konfirmasi Update Iuran
                   </p>
                   <p className="text-sm text-amber-700 dark:text-amber-300">
-                    Anda akan mengupdate data iuran <strong>"{iuranData.nama_jamaah}"</strong> untuk bulan <strong>{new Date(iuranData.bulan_tahun).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</strong>. Klik "Konfirmasi" untuk melanjutkan atau "Batal" untuk membatalkan.
+                    Anda akan mengupdate data iuran <strong>&quot;{iuranData.nama_jamaah}&quot;</strong> untuk bulan <strong>{new Date(iuranData.bulan_tahun).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</strong>. Klik &quot;Konfirmasi&quot; untuk melanjutkan atau &quot;Batal&quot; untuk membatalkan.
                   </p>
                 </div>
               </div>

@@ -23,13 +23,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <head>
-        <link
-          rel="preload"
-          href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
-          as="style"
-        />
-      </head>
       <body className={`font-lexend antialiased ${lexend.variable}`} suppressHydrationWarning>
         <Providers>
           {children}

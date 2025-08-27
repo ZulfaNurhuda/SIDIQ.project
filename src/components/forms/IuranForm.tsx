@@ -4,17 +4,23 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubmitIuran, useUserSubmissionForMonth } from '@/hooks/useIuranData';
-import { getCurrentMonthYear, getCurrentMonthYearString, formatCurrency, formatNumber, parseCurrency } from '@/lib/utils';
+import { getCurrentMonthYearString, formatCurrency, formatNumber, parseCurrency } from '@/lib/utils';
 import { Calculator, Check, Edit, AlertTriangle, AlertCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
+function getErrorMessage(err: unknown): string | undefined {
+  if (err && typeof err === 'object' && 'message' in err) {
+    const msg = (err as { message?: unknown }).message;
+    return typeof msg === 'string' ? msg : undefined;
+  }
+  return undefined;
+}
 const iuranSchema = z.object({
   iuran_1: z.number().min(0, 'Nominal tidak boleh negatif'),
   iuran_2: z.number().min(0, 'Nominal tidak boleh negatif'),
@@ -41,12 +47,10 @@ export function IuranForm() {
   const submitMutation = useSubmitIuran();
 
   const {
-    register,
     handleSubmit,
     watch,
     setValue,
     formState: { errors },
-    reset,
   } = useForm<IuranFormData>({
     resolver: zodResolver(iuranSchema),
     defaultValues: {
@@ -125,7 +129,7 @@ export function IuranForm() {
           setTimeout(() => window.location.reload(), 2000);
           return;
         }
-      } catch (error) {
+      } catch {
       }
     }
 
@@ -168,19 +172,10 @@ export function IuranForm() {
       // Show success modal
       setShowSuccessModal(true);
       // Reset form will happen automatically via refetch
-    } catch (error) {
-      // Error details for debugging
-      const errorDetails = {
-        message: error?.message,
-        code: error?.code,
-        details: error?.details,
-        hint: error?.hint,
-        stack: error?.stack
-      };
-      
-      // Set user-friendly error message
+    } catch (error: unknown) {
+      const message = getErrorMessage(error) || 'Unknown error';
       setInputErrors({ 
-        general: `Database error: ${error?.message || 'Unknown error'}. Check database setup.` 
+        general: `Database error: ${message}. Check database setup.` 
       });
     }
   };
@@ -453,7 +448,7 @@ export function IuranForm() {
                       })}. Sesuai kebijakan, setiap jamaah hanya dapat mengirim iuran sekali per bulan.
                     </p>
                     <p className="text-sm text-green-700 dark:text-green-300 mt-2">
-                      Gunakan tombol "Edit Iuran" jika ingin mengubah nominal yang sudah dikirim.
+                      Gunakan tombol &quot;Edit Iuran&quot; jika ingin mengubah nominal yang sudah dikirim.
                     </p>
                   </div>
                 </div>

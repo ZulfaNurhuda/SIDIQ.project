@@ -11,14 +11,21 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { useCreateUser } from '@/hooks/useUsers';
 import { UserPlus, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 
+function getErrorMessage(err: unknown): string | undefined {
+  if (err && typeof err === 'object' && 'message' in err) {
+    const msg = (err as { message?: unknown }).message;
+    return typeof msg === 'string' ? msg : undefined;
+  }
+  return undefined;
+}
+
 const userSchema = z.object({
   username: z.string()
     .min(3, 'Username minimal 3 karakter')
     .regex(/^[a-zA-Z0-9._]+$/, 'Username hanya boleh berisi huruf, angka, titik (.), dan underscore (_)'),
   full_name: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
-  role: z.enum(['admin', 'jamaah'], { 
-    required_error: 'Role harus dipilih',
-    invalid_type_error: 'Role harus dipilih. Silakan pilih Admin atau Jamaah.'
+  role: z.enum(['admin', 'jamaah'] as const, {
+    message: 'Role harus dipilih. Silakan pilih Admin atau Jamaah.'
   }),
   password: z.string()
     .min(6, 'Password minimal 6 karakter')
@@ -79,14 +86,13 @@ export function UserForm({ isOpen, onClose }: UserFormProps) {
           onClose();
         }, 2000);
       },
-      onError: (error: any) => {
+      onError: (error: unknown) => {
         // Enhanced error handling for better debugging
         let displayError = 'Gagal membuat user';
         
-        if (error?.message) {
-          displayError = error.message;
-        } else if (error?.error?.message) {
-          displayError = error.error.message;
+        const msg = getErrorMessage(error);
+        if (msg) {
+          displayError = msg;
         } else if (typeof error === 'string') {
           displayError = error;
         }

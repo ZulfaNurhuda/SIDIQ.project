@@ -30,11 +30,54 @@ import {
   Info,
   Lock,
   AlertTriangle,
-  FileText
+  
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { Modal } from '@/components/ui/Modal';
+
+function getErrorMessage(err: unknown): string | undefined {
+  if (err && typeof err === 'object' && 'message' in err) {
+    const msg = (err as { message?: unknown }).message;
+    return typeof msg === 'string' ? msg : undefined;
+  }
+  return undefined;
+}
+
+type BackupUser = {
+  id: string;
+  username: string;
+  full_name: string;
+  password_hash?: string;
+  role: string;
+  is_active?: boolean;
+  deleted_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+type BackupIuran = {
+  id: string;
+  user_id: string;
+  username?: string;
+  nama_jamaah: string;
+  bulan_tahun: string;
+  timestamp_submitted?: string;
+  iuran_1: number;
+  iuran_2: number;
+  iuran_3: number;
+  iuran_4: number;
+  iuran_5: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+type BackupFile = {
+  data?: {
+    users?: BackupUser[];
+    iuran_submissions?: BackupIuran[];
+  };
+};
 
 const profileSchema = z.object({
   fullName: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
@@ -110,14 +153,11 @@ export default function SettingsPage() {
         setSuccessMessage('Profile berhasil diupdate!');
         setIsUpdatingProfile(false);
       },
-      onError: (error: any) => {
-        let displayError = 'Gagal mengupdate profile';
-        if (error?.message) {
-          displayError = error.message;
-        } else if (error?.error?.message) {
-          displayError = error.error.message;
-        }
-        
+      onError: (error: unknown) => {
+        const nested = (error && typeof error === 'object' && 'error' in error)
+          ? getErrorMessage((error as { error?: unknown }).error)
+          : undefined;
+        const displayError = getErrorMessage(error) || nested || 'Gagal mengupdate profile';
         setErrorMessage(displayError);
         setIsUpdatingProfile(false);
       }
@@ -145,7 +185,7 @@ export default function SettingsPage() {
       }
 
       // If current password is correct, update to new password using proper RPC function
-      const { data: updateResult, error: updateError } = await supabase.rpc('update_user_with_password', {
+      const { error: updateError } = await supabase.rpc('update_user_with_password', {
         p_user_id: user.id,
         p_username: user.username,
         p_full_name: user.full_name,
@@ -162,12 +202,8 @@ export default function SettingsPage() {
       setIsUpdatingPassword(false);
       passwordForm.reset();
 
-    } catch (error: any) {
-      
-      let displayError = 'Gagal mengubah password';
-      if (error?.message) {
-        displayError = error.message;
-      }
+    } catch (error: unknown) {
+      const displayError = getErrorMessage(error) || 'Gagal mengubah password';
       
       setErrorMessage(displayError);
       setIsUpdatingPassword(false);
@@ -231,8 +267,9 @@ export default function SettingsPage() {
       setSuccessMessage('Backup database berhasil! File telah diunduh.');
       setShowBackupModal(false);
       
-    } catch (error: any) {
-      setErrorMessage(`Gagal backup database: ${error.message}`);
+    } catch (error: unknown) {
+      const message = getErrorMessage(error) || 'Terjadi kesalahan';
+      setErrorMessage(`Gagal backup database: ${message}`);
     } finally {
       setIsBackingUp(false);
     }
@@ -251,7 +288,7 @@ export default function SettingsPage() {
     try {
       // Read and parse backup file
       const fileContent = await restoreFile.text();
-      const backup = JSON.parse(fileContent);
+      const backup = JSON.parse(fileContent) as unknown as BackupFile;
       
       // Validate backup structure
       if (!backup.data || !backup.data.users || !backup.data.iuran_submissions) {
@@ -324,8 +361,9 @@ export default function SettingsPage() {
         window.location.reload();
       }, 2000);
       
-    } catch (error: any) {
-      setErrorMessage(`Gagal restore database: ${error.message}`);
+    } catch (error: unknown) {
+      const message = getErrorMessage(error) || 'Terjadi kesalahan';
+      setErrorMessage(`Gagal restore database: ${message}`);
     } finally {
       setIsRestoring(false);
     }
@@ -357,8 +395,9 @@ export default function SettingsPage() {
         window.location.reload();
       }, 2000);
       
-    } catch (error: any) {
-      setErrorMessage(`Gagal reset database: ${error.message}`);
+    } catch (error: unknown) {
+      const message = getErrorMessage(error) || 'Terjadi kesalahan';
+      setErrorMessage(`Gagal reset database: ${message}`);
     } finally {
       setIsResetting(false);
     }
@@ -435,7 +474,7 @@ export default function SettingsPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as 'profile' | 'security' | 'appearance' | 'system')}
                   className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     activeTab === tab.id
                       ? 'bg-primary-500/20 text-primary-900 dark:text-primary-100 border border-primary-300/50'

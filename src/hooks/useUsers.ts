@@ -69,7 +69,7 @@ export function useCreateUser() {
         throw new Error('Terjadi kesalahan yang tidak diketahui saat membuat user');
       }
     },
-    onSuccess: (result) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
       queryClient.invalidateQueries({ queryKey: ['iuran'] });
@@ -139,8 +139,9 @@ export function useUpdateUser() {
             }
             
             return data[0];
-          } catch (err: any) {
-            throw new Error(`Gagal mengupdate password: ${err.message || 'Unknown error'}`);
+          } catch (err: unknown) {
+            const msg = err && typeof err === 'object' && 'message' in err ? (err as { message?: string }).message || 'Unknown error' : 'Unknown error';
+            throw new Error(`Gagal mengupdate password: ${msg}`);
           }
         } else {
           // If no password, use regular update

@@ -3,7 +3,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { IuranSubmission, DashboardStats } from '@/types';
-import { getCurrentMonthYearString } from '@/lib/utils';
 
 export function useIuranData() {
   return useQuery({
@@ -178,12 +177,10 @@ export function useUpdateIuran() {
           throw new Error(`Format ID iuran tidak valid: "${cleanId}". ID harus berupa UUID yang valid.`);
         }
         
-        // Remove total_iuran from updateData since it's computed in the database
-        const { total_iuran, ...dataWithoutTotal } = updateData;
-        
-        // Clean data: remove any undefined or null values
+        // Remove total_iuran from updateData since it's computed in the database and clean undefined/null
         const cleanData = Object.fromEntries(
-          Object.entries(dataWithoutTotal).filter(([_, v]) => v !== undefined && v !== null)
+          Object.entries(updateData)
+            .filter(([key, v]) => key !== 'total_iuran' && v !== undefined && v !== null)
         );
         
         if (Object.keys(cleanData).length === 0) {

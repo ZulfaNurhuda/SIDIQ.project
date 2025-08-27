@@ -6,6 +6,13 @@ import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { User } from '@/types';
 
+function getErrorMessage(err: unknown): string | undefined {
+  if (err && typeof err === 'object' && 'message' in err) {
+    const msg = (err as { message?: unknown }).message;
+    return typeof msg === 'string' ? msg : undefined;
+  }
+  return undefined;
+}
 export function useAuth() {
   const { user, isAuthenticated, isLoading, setUser, setLoading, logout } = useAuthStore();
   const router = useRouter();
@@ -67,18 +74,19 @@ export function useAuth() {
         // If we get here, username exists but password is wrong
         throw new Error('WRONG_PASSWORD');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       let errorMessage = 'Terjadi kesalahan sistem';
+      const msg = getErrorMessage(error) || '';
       
-      if (error.message === 'USER_NOT_FOUND') {
+      if (msg === 'USER_NOT_FOUND') {
         errorMessage = '❌ Username tidak ditemukan. Periksa kembali username Anda.';
-      } else if (error.message === 'USER_INACTIVE') {
+      } else if (msg === 'USER_INACTIVE') {
         errorMessage = '🚫 Akun Anda tidak aktif. Hubungi administrator untuk mengaktifkan akun.';
-      } else if (error.message === 'WRONG_PASSWORD') {
+      } else if (msg === 'WRONG_PASSWORD') {
         errorMessage = '🔒 Password salah. Periksa kembali password Anda.';
-      } else if (error.message?.includes('Database error')) {
+      } else if (typeof msg === 'string' && msg.includes('Database error')) {
         errorMessage = '🔧 Koneksi database gagal. Periksa konfigurasi Supabase.';
-      } else if (error.message?.includes('Failed to fetch')) {
+      } else if (typeof msg === 'string' && msg.includes('Failed to fetch')) {
         errorMessage = '🌐 Tidak dapat terhubung ke server. Periksa URL Supabase.';
       } else {
         errorMessage = '⚠️ Terjadi kesalahan sistem. Silakan coba lagi.';
@@ -104,7 +112,7 @@ export function useAuth() {
       
       logout();
       router.push('/login');
-    } catch (error) {
+    } catch {
       logout();
       router.push('/login');
     }

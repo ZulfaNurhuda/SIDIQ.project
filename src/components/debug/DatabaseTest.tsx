@@ -5,8 +5,14 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 
+type TestResult = {
+  type: 'success' | 'error' | 'insert-test';
+  message: string;
+  [key: string]: unknown;
+};
+
 export function DatabaseTest() {
-  const [testResult, setTestResult] = useState<any>(null);
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const testConnection = async () => {
@@ -15,7 +21,7 @@ export function DatabaseTest() {
 
     try {
       // Test basic connection
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('users')
         .select('*')
         .limit(1);
@@ -26,11 +32,11 @@ export function DatabaseTest() {
         data: data,
         userCount: data?.length || 0
       });
-    } catch (error) {
+    } catch (error: unknown) {
       setTestResult({
         type: 'error',
         message: 'Database connection failed',
-        error: error
+        error
       });
     }
     
@@ -43,7 +49,7 @@ export function DatabaseTest() {
 
     try {
       // First check if table exists
-      const { data: tableCheck, error: tableError } = await supabase
+      const { error: tableError } = await supabase
         .from('iuran_submissions')
         .select('count', { count: 'exact', head: true });
 
@@ -89,11 +95,11 @@ export function DatabaseTest() {
         data: data,
         error: error
       });
-    } catch (error) {
+    } catch (error: unknown) {
       setTestResult({
         type: 'error',
         message: 'Iuran insert test failed',
-        error: error
+        error
       });
     }
     
