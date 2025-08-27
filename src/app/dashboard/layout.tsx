@@ -1,6 +1,7 @@
 'use client';
 
 import { Header } from '@/components/layout/Header';
+import HeaderBackdrop from '@/components/layout/HeaderBackdrop';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { useRequireAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -27,6 +28,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800">
       <Header />
+      <HeaderBackdrop />
       <div className="flex">
         <Sidebar />
         <main className="flex-1 p-6">
