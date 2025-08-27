@@ -1,3 +1,10 @@
+/**
+ * @project SIDIQ.project
+ * @author ZulfaNurhuda
+ * @github https://github.com/ZulfaNurhuda/SIDIQ.project
+ * @description File ini mendefinisikan layout untuk bagian dashboard, melindunginya dan menyediakan UI yang konsisten.
+ */
+
 'use client';
 
 import { Header } from '@/components/layout/Header';
@@ -6,35 +13,47 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { useRequireAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
+/**
+ * @function DashboardLayout
+ * @description Komponen layout yang melindungi semua rute di dalam path '/dashboard'.
+ * Menggunakan hook `useRequireAuth` untuk memastikan hanya pengguna yang terotentikasi yang dapat mengakses halaman ini.
+ * Juga merender layout aplikasi standar dengan Header, Sidebar, dan area konten utama.
+ * @param {{ children: React.ReactNode }} props - Properti untuk komponen.
+ * @returns {JSX.Element | null} Layout dashboard yang dirender atau null jika pengguna tidak terotentikasi.
+ */
 export default function DashboardLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
-  const { isAuthenticated, isLoading } = useRequireAuth();
+    /* Gunakan hook kustom untuk memeriksa apakah pengguna terotentikasi. */
+    const { isAuthenticated, isLoading } = useRequireAuth();
 
-  if (isLoading) {
+    /* Tampilkan ikon loading saat pemeriksaan otentikasi sedang berlangsung. */
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+                <LoadingSpinner size="lg" />
+            </div>
+        );
+    }
+
+    /* Jika pengguna tidak terotentikasi, jangan render apa pun. Hook akan menangani pengalihan. */
+    if (!isAuthenticated) {
+        return null;
+    }
+
+    /* Jika pengguna terotentikasi, render layout dashboard standar. */
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
+        <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800">
+            <Header />
+            <HeaderBackdrop />
+            <div className="flex">
+                <Sidebar />
+                <main className="flex-1 p-6">
+                    {children}
+                </main>
+            </div>
+        </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800">
-      <Header />
-      <HeaderBackdrop />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 p-6">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
 }

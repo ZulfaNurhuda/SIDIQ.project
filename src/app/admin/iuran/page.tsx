@@ -1,3 +1,13 @@
+/**
+ * @project SIDIQ.project
+ * @author ZulfaNurhuda
+ * @github https://github.com/ZulfaNurhuda/SIDIQ.project
+ * @description File ini mendefinisikan komponen AdminIuranPage untuk mengelola dan memantau
+ * data iuran jamaah. Halaman ini menyediakan pencarian, filter bulan, dan opsi pengurutan;
+ * menampilkan statistik ringkas (total iuran, total submisi, jumlah kontributor); serta
+ * mendukung aksi edit dan hapus data iuran dengan dialog konfirmasi dan umpan balik sukses/gagal.
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -26,25 +36,44 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { Select } from '@/components/ui/Select';
 import type { IuranSubmission } from '@/types';
 
+/**
+ * @function AdminIuranPage
+ * @description Halaman administrasi untuk melihat, memfilter, mengurutkan, mengedit, dan
+ * menghapus data iuran jamaah. Menampilkan statistik agregat dan daftar iuran dengan
+ * kontrol pencarian serta filter bulan. Akses dibatasi untuk peran 'superadmin' dan 'admin'.
+ * @returns {JSX.Element} Halaman manajemen iuran yang dirender.
+ */
 export default function AdminIuranPage() {
+  /* Periksa peran pengguna untuk kontrol akses. */
   const { hasAccess, isLoading: roleLoading } = useRequireRole(['superadmin', 'admin']);
+  /* Ambil data pengguna yang sedang login. */
   const { user } = useAuth();
+  /* Ambil seluruh data iuran dari database. */
   const { data: iuranData, isLoading: dataLoading } = useIuranData();
+  /* State untuk menyimpan kata kunci pencarian. */
   const [searchTerm, setSearchTerm] = useState('');
+  /* State untuk menyimpan filter bulan yang dipilih. */
   const [selectedMonth, setSelectedMonth] = useState('');
+  /* State untuk menyimpan kriteria pengurutan data. */
   const [sortBy, setSortBy] = useState<'date' | 'amount' | 'name'>('date');
+  /* State untuk menyimpan data iuran yang akan diedit. */
   const [editingIuran, setEditingIuran] = useState<IuranSubmission | null>(null);
-  const [deleteConfirmation, setDeleteConfirmation] = useState<{
-    isOpen: boolean;
-    iuranId: string;
-    jamaahName: string;
-    bulanTahun: string;
-  }>({ isOpen: false, iuranId: '', jamaahName: '', bulanTahun: '' });
+  /* State untuk mengelola dialog konfirmasi penghapusan. */
+  const [deleteConfirmation, setDeleteConfirmation] = useState({
+    isOpen: false,
+    iuranId: '',
+    jamaahName: '',
+    bulanTahun: '',
+  });
+  /* State untuk menampilkan pesan sukses setelah operasi. */
   const [successMessage, setSuccessMessage] = useState('');
+  /* State untuk menampilkan pesan error jika operasi gagal. */
   const [errorMessage, setErrorMessage] = useState('');
 
+  /* Inisialisasi hook mutasi untuk menghapus data iuran. */
   const deleteIuranMutation = useDeleteIuran();
 
+  /* Tampilkan loading jika verifikasi role sedang berjalan atau akses ditolak. */
   if (roleLoading || !hasAccess) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -53,6 +82,7 @@ export default function AdminIuranPage() {
     );
   }
 
+  /* Tampilkan loading jika data iuran masih diambil. */
   if (dataLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -61,6 +91,7 @@ export default function AdminIuranPage() {
     );
   }
 
+  /* Fungsi untuk menangani penghapusan iuran, membuka modal konfirmasi. */
   const handleDeleteIuran = (iuranId: string, jamaahName: string, bulanTahun: string) => {
     setDeleteConfirmation({
       isOpen: true,
@@ -68,16 +99,18 @@ export default function AdminIuranPage() {
       jamaahName,
       bulanTahun
     });
+    /* Reset pesan error sebelumnya. */
     setErrorMessage('');
   };
 
+  /* Fungsi untuk mengkonfirmasi dan mengeksekusi penghapusan data iuran. */
   const confirmDeleteIuran = async () => {
     try {
       await deleteIuranMutation.mutateAsync(deleteConfirmation.iuranId);
       setSuccessMessage(`Data iuran ${deleteConfirmation.jamaahName} berhasil dihapus!`);
       setDeleteConfirmation({ isOpen: false, iuranId: '', jamaahName: '', bulanTahun: '' });
       
-      // Clear success message after 3 seconds
+      /* Hapus pesan sukses otomatis setelah 3 detik */
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Gagal menghapus data iuran';
@@ -86,9 +119,9 @@ export default function AdminIuranPage() {
     }
   };
 
-  // Filter and sort data
+  /* Membentuk daftar data yang sudah difilter dan diurutkan untuk ditampilkan */
   const filteredData = iuranData?.filter((item) => {
-    const matchesSearch = 
+    const matchesSearch =
       item.nama_jamaah.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesMonth = !selectedMonth || 
@@ -96,6 +129,7 @@ export default function AdminIuranPage() {
     
     return matchesSearch && matchesMonth;
   }).sort((a, b) => {
+    /* Tentukan kriteria pengurutan sesuai pilihan pengguna */
     switch (sortBy) {
       case 'amount':
         return (b.total_iuran || 0) - (a.total_iuran || 0);
@@ -106,7 +140,7 @@ export default function AdminIuranPage() {
     }
   }) || [];
 
-  // Calculate stats
+  /* Hitung statistik ringkas untuk kartu ringkasan */
   const totalIuran = filteredData.reduce((sum, item) => sum + (item.total_iuran || 0), 0);
   const totalSubmissions = filteredData.length;
   const uniqueContributors = new Set(filteredData.map(item => item.user_id)).size;

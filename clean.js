@@ -1,57 +1,75 @@
 /**
- * Import modul yang diperlukan
- * fs: untuk operasi file system
- * path: untuk manipulasi path file/folder
+ * @project SIDIQ.project
+ * @author  ZulfaNurhuda
+ * @github  https://github.com/ZulfaNurhuda/SIDIQ.project
+ * @file    clean.js
+ * @description
+ *  Skrip utilitas sederhana untuk membersihkan artefak build atau cache.
+ *  Dapat dipanggil dari CLI untuk menghapus satu atau lebih folder target
+ *  secara rekursif dan paksa. Menggunakan `fs.rmSync` bila tersedia (Node.js ≥ 14.14)
+ *  dan fallback ke `fs.rmdirSync` pada versi yang lebih lama.
+ *
+ *  Contoh penggunaan:
+ *    - node clean.js .next .turbo dist         \* Hapus folder build Next.js, Turbo, dan dist *\
+ *    - node clean.js coverage tmp              \* Hapus folder coverage dan tmp *\
+ *
+ *  Catatan keamanan:
+ *    - Pastikan argumen mengarah ke direktori yang aman untuk dihapus.
+ *    - Skrip ini TIDAK memvalidasi apakah target berada di dalam workspace proyek.
+ *      Gunakan dengan hati-hati agar tidak menghapus folder penting di luar proyek.
  */
-const fs = require('fs');
-const path = require('path');
 
-/* Mengambil argumen dari command line, mengabaikan 2 argumen pertama (node dan nama file) */
-const toRemove = process.argv.slice(2);
+/* Import modul Node.js untuk operasi filesystem & path */
+const fs = require('fs'); /* Operasi file & folder sinkron/async */
+const path = require('path'); /* Normalisasi & resolusi path lintas OS */
+
+/* Ambil semua argumen setelah `node clean.js` sebagai daftar target penghapusan */
+const toRemove = process.argv.slice(2); /* Array nama/path folder yang akan dihapus */
 
 /**
- * Validasi input dari user
- * Jika tidak ada folder yang ditentukan, tampilkan pesan error dan hentikan program
+ * Validasi input dari user.
+ * Jika tidak ada target yang diberikan, tampilkan instruksi singkat dan keluar dengan status 1.
  */
 if (toRemove.length === 0) {
-    console.error('Harap tentukan setidaknya satu folder untuk dihapus, misalnya: \"node CLEAN.js .next .turbo\".');
-    process.exit(1);
+    console.error('Harap tentukan setidaknya satu folder untuk dihapus, misalnya: "node clean.js .next .turbo".'); /* Pesan kesalahan input */
+    process.exit(1); /* Keluar dengan kode error */
 }
 
-/* Menggunakan rmSync jika tersedia (Node.js versi baru), jika tidak gunakan rmdirSync */
-const rm = fs.rmSync ? fs.rmSync : fs.rmdirSync;
+/* Pilih API penghapusan yang tersedia: rmSync (baru) atau rmdirSync (lama) */
+const rm = fs.rmSync ? fs.rmSync /* Node ≥ 14.14 */ : fs.rmdirSync /* Fallback */;
 
-/* Flag untuk melacak apakah terjadi error selama proses penghapusan */
-let hadError = false;
+/* Penanda global untuk mengetahui apakah ada kegagalan penghapusan */
+let hadError = false; /* true jika salah satu penghapusan gagal */
 
 /**
- * Iterasi setiap folder yang akan dihapus
- * t: nama folder yang akan dihapus
+ * Iterasi setiap argumen target dan hapus jika ada.
+ * Gunakan path absolut berdasarkan direktori kerja saat ini agar perintah konsisten
+ * dari lokasi mana pun skrip ini dipanggil.
  */
-for (const t of toRemove) {
-    /* Mendapatkan path absolut dari folder */
-    const p = path.resolve(process.cwd(), t);
-    
+for (const t of toRemove) { /* t = path relatif/absolut yang diminta pengguna */
+    /* Bentuk path absolut dari target berdasarkan CWD */
+    const p = path.resolve(process.cwd(), t); /* Path absolut target */
+
     try {
-        /* Cek apakah folder ada sebelum dihapus */
-        const existed = fs.existsSync(p);
-        
-        /* Hapus folder secara rekursif dan paksa */
-        rm(p, { recursive: true, force: true });
-        
-        /* Tampilkan pesan sukses atau dilewati */
-        console.log(`${existed ? 'Berhasil dihapus' : 'Dilewati (folder tidak ditemukan)'}: ${t}`);
+        /* Periksa eksistensi target untuk menentukan pesan yang akan ditampilkan */
+        const existed = fs.existsSync(p); /* true jika folder ada saat dicek */
+
+        /* Eksekusi penghapusan direktori secara rekursif dan paksa */
+        rm(p, { recursive: true, force: true }); /* Hapus aman: tidak error jika tidak ada */
+
+        /* Laporkan hasil: dihapus bila ada, dilewati bila tidak ditemukan */
+        console.log(`${existed ? 'Berhasil dihapus' : 'Dilewati (folder tidak ditemukan)'}: ${t}`); /* Umpan balik pengguna */
     } catch (e) {
-        /* Tangkap error jika terjadi masalah saat penghapusan */
-        hadError = true;
-        console.error(`Gagal menghapus folder ${t}, detail:`, e && e.message ? e.message : e);
+        /* Tangani kegagalan (misalnya izin file, file terkunci, path tidak valid) */
+        hadError = true; /* Tandai bahwa setidaknya satu operasi gagal */
+        console.error(`Gagal menghapus folder ${t}, detail:`, e && e.message ? e.message : e); /* Log detail error */
     }
 }
 
 /**
- * Tampilkan pesan sukses dan akhiri program
- * Jika terjadi error, exit code 1
- * Jika sukses, exit code 0
+ * Ringkasan akhir dan kode keluar proses.
+ * - 0: semua operasi sukses atau target tidak ditemukan (dilewati)
+ * - 1: terdapat setidaknya satu kegagalan saat menghapus
  */
-console.log('Berhasil membersihkan artefak build.');
-process.exit(hadError ? 1 : 0);
+console.log('Berhasil membersihkan artefak build.'); /* Pesan akhir umum */
+process.exit(hadError ? 1 : 0); /* Tentukan exit code berdasarkan hadError */

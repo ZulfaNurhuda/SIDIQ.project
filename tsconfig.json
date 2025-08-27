@@ -1,27 +1,65 @@
+/*
+===================================================================================================================================
+|| PROJECT: SIDIQ.project                                                                                                        ||
+|| AUTHOR: ZulfaNurhuda                                                                                                          ||
+|| GITHUB: https://github.com/ZulfaNurhuda/SIDIQ.project                                                                         ||
+|| DESCRIPTION: File ini mengkonfigurasi kompiler TypeScript untuk proyek, mendefinisikan bagaimana file TypeScript dikompilasi. ||
+===================================================================================================================================
+*/
 {
-  "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
+    "compilerOptions": {
+        /* Tentukan versi target ECMAScript untuk kode JavaScript yang dihasilkan. */
+        "target": "ES2017",
+        /* Tentukan daftar pustaka JavaScript yang akan disertakan dalam kompilasi. */
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "esnext"
+        ],
+        /* Izinkan file JavaScript untuk dikompilasi. */
+        "allowJs": true,
+        /* Lewati pemeriksaan tipe semua file deklarasi (*.d.ts). */
+        "skipLibCheck": true,
+        /* Aktifkan semua opsi pemeriksaan tipe yang ketat. */
+        "strict": true,
+        /* Jangan mengeluarkan output (file JavaScript) dari kompiler TypeScript. */
+        "noEmit": true,
+        /* Aktifkan interoperabilitas antara CommonJS dan modul ES. */
+        "esModuleInterop": true,
+        /* Tentukan strategi pembuatan kode modul. */
+        "module": "esnext",
+        /* Tentukan bagaimana modul diselesaikan. "bundler" direkomendasikan untuk bundler modern. */
+        "moduleResolution": "bundler",
+        /* Aktifkan pengimporan file .json sebagai modul. */
+        "resolveJsonModule": true,
+        /* Pastikan setiap file dapat dikompilasi secara terpisah. */
+        "isolatedModules": true,
+        /* Pertahankan sintaks JSX dalam output untuk pemrosesan lebih lanjut oleh Babel atau alat lainnya. */
+        "jsx": "preserve",
+        /* Aktifkan kompilasi inkremental untuk mempercepat pembangunan ulang. */
+        "incremental": true,
+        /* Konfigurasi plugin layanan bahasa TypeScript. */
+        "plugins": [
+            {
+                "name": "next" /* Plugin TypeScript Next.js untuk pengalaman pengembangan yang ditingkatkan. */
+            }
+        ],
+        /* Konfigurasi jalur alias modul. */
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ] /* Memungkinkan pengimporan modul menggunakan awalan "@/" untuk direktori 'src'. */
+        }
+    },
+    /* Tentukan file mana yang akan disertakan dalam kompilasi. */
+    "include": [
+        "next-env.d.ts",
+        "**/*.ts",
+        "**/*.tsx",
+        ".next/types/**/*.ts"
     ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+    /* Tentukan file mana yang akan dikecualikan dari kompilasi. */
+    "exclude": [
+        "node_modules"
+    ]
 }

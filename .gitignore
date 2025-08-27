@@ -1,46 +1,136 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# =======================================================================================================================================
+# || PROJECT: SIDIQ.project                                                                                                            ||
+# || AUTHOR: ZulfaNurhuda                                                                                                              ||
+# || GITHUB: https://github.com/ZulfaNurhuda/SIDIQ.project                                                                             ||
+# || DESCRIPTION: File ini menentukan file-file yang sengaja tidak dilacak oleh Git.                                                   ||
+# ||              Ini membantu menjaga repositori tetap bersih dengan mengecualikan artefak build, dependensi, dan informasi sensitif. ||
+# =======================================================================================================================================
 
-# dependencies
+# ============================================================================================================================================
+# [PANDUAN UMUM]: Untuk informasi lebih lanjut tentang cara kerja file .gitignore, kunjungi: https://help.github.com/articles/ignoring-files/
+# ============================================================================================================================================
+
+# -----------------------------------------------------------------------------------------------------------------------------------
+# [1] DEPENDENSI & ARTEFAK MANAJER PAKET
+#     File dan direktori yang dihasilkan oleh manajer paket (npm, Yarn, pnpm) yang tidak perlu dilacak oleh Git.
+# -----------------------------------------------------------------------------------------------------------------------------------
+
+# Direktori instalasi modul Node.js
 /node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
-# testing
+# Direktori instalasi Plug'n'Play (Yarn)
+/.pnp
+
+# File cache Plug'n'Play (Yarn)
+.pnp.js
+
+# Jika menggunakan Yarn 2+ (Berry), ini akan mengabaikan direktori .yarn/
+# Kecualikan patch Yarn
+# !.yarn/patches
+
+# Kecualikan plugin Yarn
+# !.yarn/plugins
+
+# Kecualikan rilis Yarn
+# !.yarn/releases
+
+# Kecualikan versi Yarn
+# !.yarn/versions
+
+# -----------------------------------------------------------------------------------------------------------------------------------
+# [2] ARTEFAK PENGUJIAN
+#     Direktori yang berisi laporan atau hasil dari eksekusi pengujian.
+# -----------------------------------------------------------------------------------------------------------------------------------
+
+# Laporan cakupan kode
 /coverage
 
-# next.js
+# -----------------------------------------------------------------------------------------------------------------------------------
+# [3] OUTPUT BUILD NEXT.JS
+#     Direktori dan file yang dihasilkan oleh proses build Next.js.
+# -----------------------------------------------------------------------------------------------------------------------------------
+
+# Direktori build Next.js (berisi kode yang dikompilasi, cache, dll.)
 /.next/
+
+# Direktori output untuk ekspor statis Next.js (jika digunakan)
 /out/
 
-# production
+# -----------------------------------------------------------------------------------------------------------------------------------
+# [4] ARTEFAK PRODUKSI
+#     Direktori yang berisi hasil build akhir untuk deployment produksi.
+# -----------------------------------------------------------------------------------------------------------------------------------
+
+# Direktori build umum (jika ada)
 /build
 
-# misc
+# -----------------------------------------------------------------------------------------------------------------------------------
+# [5] FILE SISTEM OPERASI & MISC
+#     File-file yang dibuat oleh sistem operasi atau editor yang tidak relevan dengan repositori.
+# -----------------------------------------------------------------------------------------------------------------------------------
+
+# File metadata macOS
 .DS_Store
+
+# File kunci pribadi (misalnya, untuk sertifikat SSL) - SANGAT PENTING UNTUK TIDAK DI-COMMIT!
 *.pem
 
-# debug
+# -----------------------------------------------------------------------------------------------------------------------------------
+# [6] FILE DEBUGGING & LOG
+#     File-file yang berisi log atau informasi debugging yang tidak perlu dilacak.
+# -----------------------------------------------------------------------------------------------------------------------------------
+
+# Log debugging npm
 npm-debug.log*
+
+# Log debugging Yarn
 yarn-debug.log*
+
+# Log error Yarn
 yarn-error.log*
+
+# Log debugging pnpm
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-!.env.example
+# -----------------------------------------------------------------------------------------------------------------------------------
+# [7] FILE LINGKUNGAN LOKAL
+#     File yang berisi variabel lingkungan sensitif yang tidak boleh di-commit ke repositori publik.
+# -----------------------------------------------------------------------------------------------------------------------------------
 
-# vercel
+# Semua file .env.local (misalnya, .env.local, .env.development.local)
+.env*.local
+
+# File .env utama (jika ada)
+.env
+
+# Catatan: File .env.example harus di-commit sebagai template untuk konfigurasi.
+
+# -----------------------------------------------------------------------------------------------------------------------------------
+# [8] FILE SPESIFIK VERCEL
+#     File dan direktori yang dihasilkan oleh platform deployment Vercel.
+# -----------------------------------------------------------------------------------------------------------------------------------
+
+# Direktori konfigurasi Vercel
 .vercel
 
-# typescript
+# -----------------------------------------------------------------------------------------------------------------------------------
+# [9] ARTEFAK TYPESCRIPT
+#     File-file yang dihasilkan oleh kompiler TypeScript.
+# -----------------------------------------------------------------------------------------------------------------------------------
+
+# File informasi build TypeScript
 *.tsbuildinfo
+
+# File deklarasi lingkungan Next.js yang dihasilkan secara otomatis
 next-env.d.ts
 
-# log files
+# -----------------------------------------------------------------------------------------------------------------------------------
+# [10] FILE LOG UMUM
+#      File log generik yang mungkin dihasilkan oleh aplikasi atau server.
+# -----------------------------------------------------------------------------------------------------------------------------------
+
+# Semua file dengan ekstensi .log
 *.log
+
+# Semua file dengan ekstensi .log. diikuti oleh karakter lain
 *.log.*
