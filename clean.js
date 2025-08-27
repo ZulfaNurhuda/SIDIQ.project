@@ -71,5 +71,5 @@ for (const t of toRemove) { /* t = path relatif/absolut yang diminta pengguna */
  * - 0: semua operasi sukses atau target tidak ditemukan (dilewati)
  * - 1: terdapat setidaknya satu kegagalan saat menghapus
  */
-console.log('Berhasil membersihkan artefak build.'); /* Pesan akhir umum */
+console.log('Berhasil membersihkan artefak build.\n'); /* Pesan akhir umum */
 process.exit(hadError ? 1 : 0); /* Tentukan exit code berdasarkan hadError */

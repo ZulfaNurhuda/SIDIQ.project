@@ -16,8 +16,6 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
-import { DatabaseTest } from '@/components/debug/DatabaseTest';
-import { EnvCheck } from '@/components/debug/EnvCheck';
 import { FullPageLoading } from '@/components/ui/FullPageLoading';
 
 /* Skema Zod untuk memvalidasi data form login. */
@@ -139,17 +137,7 @@ export function LoginForm() {
                     <LogIn className="mr-2 h-4 w-4" />
                     {isLoading ? 'Masuk...' : 'Masuk'}
                 </Button>
-
-                <div className="text-center">
-                    <p className="text-body-small text-gray-600 dark:text-gray-300">Default SUPERADMIN: ZulfaNurhuda / Zn.9192631770</p>
-                </div>
             </form>
-
-            {/* Komponen debugging yang ditampilkan di halaman login */}
-            <div className="mt-6 space-y-4">
-                <EnvCheck />
-                <DatabaseTest />
-            </div>
         </>
     );
 }
