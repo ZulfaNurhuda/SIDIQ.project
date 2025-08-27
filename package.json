@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "clean": "node clean .next .turbo",
+    "rebuild": "npm run clean && npm run build"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.7",
