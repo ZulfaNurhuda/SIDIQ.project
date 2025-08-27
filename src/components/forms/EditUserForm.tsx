@@ -16,9 +16,8 @@ import { Select } from '@/components/ui/Select';
 
 const editUserSchema = z.object({
   full_name: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
-  role: z.enum(['admin', 'jamaah', 'superadmin'], { 
-    required_error: 'Role harus dipilih',
-    invalid_type_error: 'Role harus dipilih. Silakan pilih Admin atau Jamaah.'
+  role: z.enum(['admin', 'jamaah', 'superadmin'], {
+    message: 'Role harus dipilih'
   }),
   password: z.string()
     .optional()

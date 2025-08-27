@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
+import { PageTitle } from '@/components/ui/PageTitle';
 import { 
   Settings,
   User,
@@ -392,14 +393,11 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-heading-1 text-gray-900 dark:text-white mb-2">
-          Pengaturan
-        </h1>
-        <p className="text-body text-gray-600 dark:text-gray-300">
-          Kelola pengaturan akun dan sistem
-        </p>
-      </div>
+      <PageTitle
+        title="Pengaturan"
+        description="Kelola pengaturan akun dan sistem"
+        icon={Settings}
+      />
 
       {/* Success/Error Messages */}
       {successMessage && (
@@ -459,7 +457,12 @@ export default function SettingsPage() {
           {activeTab === 'profile' && (
             <Card>
               <CardHeader>
-                <CardTitle>Informasi Profile</CardTitle>
+                <CardTitle className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
+                    <User className="h-5 w-5 text-blue-700 dark:text-blue-400" />
+                  </div>
+                  <span className="text-blue-900 dark:text-white">Informasi Profile</span>
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* User Info Display */}
@@ -516,7 +519,12 @@ export default function SettingsPage() {
           {activeTab === 'security' && (
             <Card>
               <CardHeader>
-                <CardTitle>Keamanan Akun</CardTitle>
+                <CardTitle className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
+                    <Lock className="h-5 w-5 text-blue-700 dark:text-blue-400" />
+                  </div>
+                  <span className="text-blue-900 dark:text-white">Keamanan Akun</span>
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
@@ -607,12 +615,17 @@ export default function SettingsPage() {
           {activeTab === 'appearance' && (
             <Card>
               <CardHeader>
-                <CardTitle>Pengaturan Tampilan</CardTitle>
+                <CardTitle className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
+                    <Palette className="h-5 w-5 text-blue-700 dark:text-blue-400" />
+                  </div>
+                  <span className="text-blue-900 dark:text-white">Pengaturan Tampilan</span>
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Theme</h3>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">Tema</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300">
                       Pilih tema tampilan aplikasi
                     </p>
@@ -626,7 +639,7 @@ export default function SettingsPage() {
                       <CardContent className="p-4 text-center">
                         <Palette className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-gray-600 dark:text-gray-300">Warna Aksen</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Coming Soon</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Segera Hadir</p>
                       </CardContent>
                     </Card>
 
@@ -634,15 +647,15 @@ export default function SettingsPage() {
                       <CardContent className="p-4 text-center">
                         <Bell className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                         <p className="text-sm text-gray-600 dark:text-gray-300">Notifikasi</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Coming Soon</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Segera Hadir</p>
                       </CardContent>
                     </Card>
 
                     <Card className="border-2 border-dashed border-gray-300/70 dark:border-gray-600">
                       <CardContent className="p-4 text-center">
                         <Settings className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600 dark:text-gray-300">Layout</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Coming Soon</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Tata Letak</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Segera Hadir</p>
                       </CardContent>
                     </Card>
                   </div>
@@ -655,7 +668,12 @@ export default function SettingsPage() {
           {activeTab === 'system' && (
             <Card>
               <CardHeader>
-                <CardTitle>Pengaturan Sistem</CardTitle>
+                <CardTitle className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
+                    <Database className="h-5 w-5 text-blue-700 dark:text-blue-400" />
+                  </div>
+                  <span className="text-blue-900 dark:text-white">Pengaturan Sistem</span>
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {user?.role === 'superadmin' && (
@@ -692,7 +710,7 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="border-t border-gray-300/70 dark:border-gray-700 pt-6">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Danger Zone</h3>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Zona Berbahaya</h3>
                       <Card className="border-red-400/60 dark:border-red-800 bg-red-500/20 dark:bg-red-900/20">
                         <CardContent className="p-4">
                           <div className="flex items-start space-x-3">
@@ -752,7 +770,7 @@ export default function SettingsPage() {
         message="Apakah Anda yakin ingin membackup database? File backup akan diunduh ke komputer Anda."
         confirmText="Ya, Backup"
         isLoading={isBackingUp}
-        variant="default"
+        variant="info"
       />
       
       {/* Custom Restore Modal */}

@@ -1,7 +1,9 @@
 import { HTMLAttributes, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
-export interface CardProps extends HTMLAttributes<HTMLDivElement> {}
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode;
+}
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, ...props }, ref) => (
@@ -29,7 +31,7 @@ const CardTitle = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLHeadingEle
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('text-heading-3 text-gray-900 dark:text-white leading-none tracking-tight', className)}
+      className={cn('text-xl font-bold text-gray-900 dark:text-white leading-none tracking-tight', className)}
       {...props}
     />
   )

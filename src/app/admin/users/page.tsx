@@ -10,6 +10,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { UserForm } from '@/components/forms/UserForm';
 import { EditUserForm } from '@/components/forms/EditUserForm';
+import { PageTitle } from '@/components/ui/PageTitle';
 import { User } from '@/types';
 import { Users, UserPlus, Trash2, Edit, AlertCircle } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
@@ -115,20 +116,11 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-heading-1 text-gray-900 dark:text-white mb-2">
-            Manajemen User
-          </h1>
-          <p className="text-body text-gray-600 dark:text-gray-300">
-            Kelola user admin dan jamaah
-          </p>
-        </div>
-        <Button onClick={() => setShowUserForm(true)}>
-          <UserPlus className="mr-2 h-4 w-4" />
-          Tambah User
-        </Button>
-      </div>
+      <PageTitle
+        title="Manajemen User"
+        description="Kelola user admin dan jamaah"
+        icon={Users}
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -139,7 +131,7 @@ export default function UsersPage() {
                 <Users className="h-5 w-5 text-primary-600 dark:text-primary-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total User</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Pengguna</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {users?.length || 0}
                 </p>
@@ -200,7 +192,18 @@ export default function UsersPage() {
       {/* User List */}
       <Card>
         <CardHeader>
-          <CardTitle>Daftar User</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
+                <Users className="h-5 w-5 text-blue-700 dark:text-blue-400" />
+              </div>
+              <span className="text-blue-900 dark:text-white">Daftar Pengguna</span>
+            </CardTitle>
+            <Button onClick={() => setShowUserForm(true)}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Tambah Pengguna
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {filteredUsers.length === 0 ? (

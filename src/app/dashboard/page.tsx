@@ -5,7 +5,8 @@ import { useDashboardStats, useIuranData } from '@/hooks/useIuranData';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { StatsCard } from '@/components/features/dashboard/StatsCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Users, DollarSign, CheckCircle, Clock } from 'lucide-react';
+import { PageTitle } from '@/components/ui/PageTitle';
+import { Users, DollarSign, CheckCircle, Clock, LayoutDashboard } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
 export default function DashboardPage() {
@@ -35,14 +36,11 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-heading-1 text-gray-900 dark:text-white mb-2">
-          Dashboard Admin
-        </h1>
-        <p className="text-body text-gray-600 dark:text-gray-300">
-          Overview sistem informasi infaq bulanan
-        </p>
-      </div>
+      <PageTitle
+        title="Dasbor Admin"
+        description="Overview sistem informasi infaq bulanan"
+        icon={LayoutDashboard}
+      />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -76,7 +74,12 @@ export default function DashboardPage() {
       {/* Recent Submissions */}
       <Card>
         <CardHeader>
-          <CardTitle>Iuran Terbaru</CardTitle>
+          <CardTitle className="flex items-center space-x-3">
+            <div className="p-2 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
+              <Clock className="h-5 w-5 text-blue-700 dark:text-blue-400" />
+            </div>
+            <span className="text-blue-900 dark:text-white">Iuran Terbaru</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {recentSubmissions.length === 0 ? (

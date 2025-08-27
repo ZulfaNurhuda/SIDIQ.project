@@ -176,7 +176,7 @@ export function IuranForm() {
         details: error?.details,
         hint: error?.hint,
         stack: error?.stack
-      });
+      };
       
       // Set user-friendly error message
       setInputErrors({ 

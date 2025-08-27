@@ -18,7 +18,7 @@ import {
 
 const navigationItems = [
   {
-    name: 'Dashboard',
+    name: 'Dasbor',
     href: '/dashboard',
     icon: LayoutDashboard,
     roles: ['superadmin', 'admin'],
@@ -72,7 +72,7 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="w-64 bg-blue-50/40 dark:bg-black/20 backdrop-blur-md border border-gray-300/70 dark:border-white/10 shadow-sm h-[calc(100vh-4rem)] sticky top-16 flex flex-col">
+    <aside className="w-64 bg-blue-50/40 dark:bg-black/20 backdrop-blur-md border border-gray-300/70 dark:border-white/10 shadow-sm h-[calc(100vh-7.5rem)] sticky top-24 flex flex-col rounded-lg ml-4">
       <nav className="p-4 space-y-2 flex-1">
         {filteredItems.map((item) => {
           const isActive = pathname === item.href;

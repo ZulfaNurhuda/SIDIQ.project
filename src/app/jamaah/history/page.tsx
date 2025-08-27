@@ -5,8 +5,9 @@ import { useIuranData } from '@/hooks/useIuranData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { PageTitle } from '@/components/ui/PageTitle';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import { Calendar, DollarSign } from 'lucide-react';
+import { Calendar, DollarSign, History } from 'lucide-react';
 
 export default function JamaahHistoryPage() {
   const { user } = useAuth();
@@ -26,12 +27,11 @@ export default function JamaahHistoryPage() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-heading-1 text-gray-900 dark:text-white mb-2">
-          Riwayat Iuran
-        </h1>
-        <p className="text-body text-gray-600 dark:text-gray-300">
-          Riwayat pembayaran iuran bulanan Anda
-        </p>
+        <PageTitle
+          title="Riwayat Iuran"
+          description="Riwayat pembayaran iuran bulanan Anda"
+          icon={History}
+        />
       </div>
 
       {userIuran.length === 0 ? (
@@ -120,8 +120,11 @@ export default function JamaahHistoryPage() {
       {userIuran.length > 0 && (
         <Card className="bg-blue-500/20 dark:bg-blue-900/20">
           <CardHeader>
-            <CardTitle className="text-primary-900 dark:text-primary-100">
-              Ringkasan
+            <CardTitle className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
+                <DollarSign className="h-5 w-5 text-blue-700 dark:text-blue-400" />
+              </div>
+              <span className="text-blue-900 dark:text-white">Ringkasan</span>
             </CardTitle>
           </CardHeader>
           <CardContent>

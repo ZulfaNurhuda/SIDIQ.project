@@ -31,8 +31,8 @@ export interface AuditLog {
   action: string;
   table_name: string;
   record_id?: string;
-  old_values?: Record<string, any>;
-  new_values?: Record<string, any>;
+  old_values?: Record<string, unknown>;
+  new_values?: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -47,7 +47,7 @@ export interface IuranFormData {
 export interface ExportFormat {
   format: 'xlsx' | 'csv' | 'xml' | 'json';
   filename: string;
-  data: any[];
+  data: IuranSubmission[];
 }
 
 export interface DashboardStats {

@@ -6,21 +6,21 @@ import { useIuranData, useDeleteIuran } from '@/hooks/useIuranData';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { EditIuranForm } from '@/components/forms/EditIuranForm';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import { PageTitle } from '@/components/ui/PageTitle';
 import { 
   Search, 
   Filter, 
   Calendar,
   Users,
   DollarSign,
-  Download,
   Edit,
   Trash2,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Select } from '@/components/ui/Select';
@@ -87,8 +87,7 @@ export default function AdminIuranPage() {
   // Filter and sort data
   const filteredData = iuranData?.filter((item) => {
     const matchesSearch = 
-      item.nama_jamaah.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.users?.username?.toLowerCase().includes(searchTerm.toLowerCase());
+      item.nama_jamaah.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesMonth = !selectedMonth || 
       new Date(item.bulan_tahun).toISOString().slice(0, 7) === selectedMonth;
@@ -112,14 +111,11 @@ export default function AdminIuranPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-heading-1 text-gray-900 dark:text-white mb-2">
-          Data Iuran
-        </h1>
-        <p className="text-body text-gray-600 dark:text-gray-300">
-          Kelola dan pantau data iuran dari seluruh jamaah
-        </p>
-      </div>
+      <PageTitle
+        title="Data Iuran"
+        description="Kelola dan pantau data iuran dari seluruh jamaah"
+        icon={FileText}
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -254,8 +250,11 @@ export default function AdminIuranPage() {
       {/* Data Table */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            Daftar Iuran ({filteredData.length} data)
+          <CardTitle className="flex items-center space-x-3">
+            <div className="p-2 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
+              <FileText className="h-5 w-5 text-blue-700 dark:text-blue-400" />
+            </div>
+            <span className="text-blue-900 dark:text-white">Daftar Iuran ({filteredData.length} data)</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -291,7 +290,7 @@ export default function AdminIuranPage() {
                             {item.nama_jamaah}
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            @{item.users?.username || item.username}
+                            @{item.nama_jamaah}
                           </p>
                         </div>
                       </td>
@@ -329,8 +328,8 @@ export default function AdminIuranPage() {
                                 item.iuran_5 > 0 ? { label: '5', amount: item.iuran_5 } : null,
                               ].filter(Boolean).map((iuran, index) => (
                                 <div key={index} className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-green-100/80 dark:bg-green-900/30 border border-green-200/50 dark:border-green-700/50 whitespace-nowrap">
-                                  <span className="text-green-800 dark:text-green-200 font-semibold mr-1">Iuran {iuran.label}:</span>
-                                  <span className="text-green-700 dark:text-green-300">{formatCurrency(iuran.amount)}</span>
+                                  <span className="text-green-800 dark:text-green-200 font-semibold mr-1">Iuran {iuran!.label}:</span>
+                                  <span className="text-green-700 dark:text-green-300">{formatCurrency(iuran!.amount)}</span>
                                 </div>
                               ))}
                             </div>

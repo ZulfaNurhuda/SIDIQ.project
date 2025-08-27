@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { PageTitle } from '@/components/ui/PageTitle';
 import { exportToXLSX, exportToCSV, exportToJSON, exportToXML } from '@/lib/exportUtils';
 import { Download, FileText, Filter, Calendar } from 'lucide-react';
 
@@ -22,7 +23,6 @@ export default function ExportPage() {
   
   const {
     register,
-    handleSubmit,
     watch,
     formState: { errors },
   } = useForm<ExportFilters>();
@@ -97,7 +97,7 @@ export default function ExportPage() {
       
       // Small delay to show loading state
       await new Promise(resolve => setTimeout(resolve, 1000));
-    } catch (error) {
+    } catch {
       // Export error handling
     } finally {
       setIsExporting(false);
@@ -108,21 +108,20 @@ export default function ExportPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-heading-1 text-gray-900 dark:text-white mb-2">
-          Export Data Iuran
-        </h1>
-        <p className="text-body text-gray-600 dark:text-gray-300">
-          Export data iuran dalam berbagai format (XLSX, CSV, XML, JSON)
-        </p>
-      </div>
+      <PageTitle
+        title="Export Data Iuran"
+        description="Export data iuran dalam berbagai format (XLSX, CSV, XML, JSON)"
+        icon={Download}
+      />
 
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Filter className="h-5 w-5" />
-            <span>Filter Data</span>
+          <CardTitle className="flex items-center space-x-3">
+            <div className="p-2 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
+              <Filter className="h-5 w-5 text-blue-700 dark:text-blue-400" />
+            </div>
+            <span className="text-blue-900 dark:text-white">Filter Data</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -152,7 +151,7 @@ export default function ExportPage() {
               <div className="flex items-center space-x-1">
                 <FileText className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                 <span className="text-gray-600 dark:text-gray-300">
-                  {filteredData.length} dari {iuranData?.length || 0} records
+                  {filteredData.length} dari {iuranData?.length || 0} data
                 </span>
               </div>
               <div className="flex items-center space-x-1">
@@ -169,9 +168,11 @@ export default function ExportPage() {
       {/* Export Buttons */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Download className="h-5 w-5" />
-            <span>Format Export</span>
+          <CardTitle className="flex items-center space-x-3">
+            <div className="p-2 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
+              <Download className="h-5 w-5 text-blue-700 dark:text-blue-400" />
+            </div>
+            <span className="text-blue-900 dark:text-white">Format Export</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -185,7 +186,7 @@ export default function ExportPage() {
               <FileText className="h-8 w-8" />
               <div className="text-center">
                 <div className="font-semibold">XLSX</div>
-                <div className="text-xs opacity-80">Spreadsheet format</div>
+                <div className="text-xs opacity-80">Format spreadsheet</div>
               </div>
             </Button>
 
@@ -199,7 +200,7 @@ export default function ExportPage() {
               <FileText className="h-8 w-8" />
               <div className="text-center">
                 <div className="font-semibold">CSV</div>
-                <div className="text-xs opacity-80">Comma separated</div>
+                <div className="text-xs opacity-80">Dipisahkan koma</div>
               </div>
             </Button>
 
@@ -213,7 +214,7 @@ export default function ExportPage() {
               <FileText className="h-8 w-8" />
               <div className="text-center">
                 <div className="font-semibold">JSON</div>
-                <div className="text-xs opacity-80">API format</div>
+                <div className="text-xs opacity-80">Format API</div>
               </div>
             </Button>
 
@@ -227,7 +228,7 @@ export default function ExportPage() {
               <FileText className="h-8 w-8" />
               <div className="text-center">
                 <div className="font-semibold">XML</div>
-                <div className="text-xs opacity-80">Structured data</div>
+                <div className="text-xs opacity-80">Data terstruktur</div>
               </div>
             </Button>
           </div>
@@ -246,7 +247,12 @@ export default function ExportPage() {
       {filteredData.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Preview Data</CardTitle>
+            <CardTitle className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-500/20 dark:bg-blue-900/20 rounded-lg">
+                <FileText className="h-5 w-5 text-blue-700 dark:text-blue-400" />
+              </div>
+              <span className="text-blue-900 dark:text-white">Preview Data</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
